@@ -1,5 +1,6 @@
 ---
 import BillCalculator from '../components/BillCalculator';
+import { GOOGLE_ANALYTICS_CONFIG } from '../config/googleAnalytics';
 import '../styles/global.css';
 ---
 
@@ -55,6 +56,19 @@ import '../styles/global.css';
   </head>
   <body>
     <BillCalculator client:load />
+
+    {GOOGLE_ANALYTICS_CONFIG.shouldTrack && (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_CONFIG.measurementId}`}></script>
+        <script is:inline define:vars={{ measurementId: GOOGLE_ANALYTICS_CONFIG.measurementId }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', measurementId);
+          console.log('[Google Analytics] Initialized successfully with ID:', measurementId);
+        </script>
+      </>
+    )}
 
     <script>
       // Register Service Worker for PWA offline support
