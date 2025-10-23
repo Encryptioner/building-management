@@ -36,6 +36,14 @@ export function loadBillData(mode: FormMode = 'calculated'): BillData | null {
       };
     }
 
+    // Ensure all categories have isOwnerOnly field (default to false for backward compatibility)
+    if (parsed.categories) {
+      parsed.categories = parsed.categories.map((cat: any) => ({
+        ...cat,
+        isOwnerOnly: cat.isOwnerOnly ?? false,
+      }));
+    }
+
     return parsed;
   } catch (error) {
     console.error('Failed to load bill data:', error);

@@ -196,6 +196,52 @@ export default function BillPreview({
     }
   };
 
+  const handleShare = async () => {
+    try {
+      // Check if Web Share API is supported
+      if (!navigator.share) {
+        alert(uiMsgs.shareNotSupported || 'Sharing is not supported on this browser');
+        return;
+      }
+
+      const canvas = await generateCanvas();
+      if (!canvas) return;
+
+      // Convert canvas to blob
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.9);
+      });
+
+      if (!blob) {
+        alert(uiMsgs.imageGenerationError);
+        return;
+      }
+
+      // Create a File object from the blob
+      const fileName = getSanitizedFileName('jpg');
+      const file = new File([blob], fileName, { type: 'image/jpeg' });
+
+      // Check if files can be shared
+      if (navigator.canShare && !navigator.canShare({ files: [file] })) {
+        alert(uiMsgs.shareNotSupported || 'Sharing files is not supported on this device');
+        return;
+      }
+
+      // Share the file
+      await navigator.share({
+        title: billData.title || t.header.title,
+        text: t.preview.shareText || 'Service Charge Bill',
+        files: [file],
+      });
+    } catch (error) {
+      // User cancelled the share or other error occurred
+      if ((error as Error).name !== 'AbortError') {
+        console.error('Error sharing:', error);
+        alert(uiMsgs.shareError || 'Failed to share the bill');
+      }
+    }
+  };
+
   const BillContent = () => (
     <>
             {/* Bill Header */}
@@ -210,6 +256,88 @@ export default function BillPreview({
                 {uiMsgs.numberOfFlats}: {billData.numberOfFlats}
               </p>
             </div>
+
+            {/* Owner-Only Categories Table */}
+            {billData.categories.some(cat => cat.isOwnerOnly) && (
+              <div className="mb-8">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2" style={{color: '#111827'}}>
+                  <span>{t.summary.ownerCollection}</span>
+                  <span className="text-sm font-normal" style={{color: '#c2410c'}}>({t.category.isOwnerOnly})</span>
+                </h2>
+                <table className="w-full border-collapse" style={{
+                  background: 'repeating-linear-gradient(45deg, #fff, #fff 10px, #f9fafb 10px, #f9fafb 20px)'
+                }}>
+                  <thead>
+                    <tr style={{backgroundColor: '#e5e7eb', borderTop: '3px solid #000', borderBottom: '3px solid #000'}}>
+                      <th className="px-3 py-2 text-left text-sm font-bold" style={{border: '2px solid #1f2937'}}>
+                        {t.preview.category}
+                      </th>
+                      <th className="px-3 py-2 text-left text-sm font-bold" style={{border: '2px solid #1f2937'}}>
+                        {t.preview.duration}
+                      </th>
+                      <th className="px-3 py-2 text-left text-sm font-bold" style={{border: '2px solid #1f2937'}}>
+                        {t.preview.info}
+                      </th>
+                      <th className="px-3 py-2 text-left text-sm font-bold" style={{border: '2px solid #1f2937'}}>
+                        {t.preview.type}
+                      </th>
+                      <th className="px-3 py-2 text-right text-sm font-bold whitespace-nowrap" style={{border: '2px solid #1f2937'}}>
+                        {t.preview.amount}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {billData.categories.filter(cat => cat.isOwnerOnly).map((category) => {
+                      const perFlat = summary.categoryTotals.get(category.id) || 0;
+                      return (
+                        <tr key={category.id}>
+                          <td className="px-3 py-2 font-bold text-sm" style={{border: '2px solid #1f2937'}}>
+                            {category.name}
+                          </td>
+                          <td className="px-3 py-2 text-xs" style={{border: '2px solid #1f2937'}}>
+                            {category.duration}
+                          </td>
+                          <td className="px-3 py-2 text-xs" style={{border: '2px solid #1f2937'}}>
+                            {category.info}
+                          </td>
+                          <td className="px-3 py-2 text-xs" style={{border: '2px solid #1f2937'}}>
+                            {category.billType === 'single-flat'
+                              ? t.category.singleFlat
+                              : `${formatNumber(category.amount)} ÷ ${billData.numberOfFlats}`}
+                          </td>
+                          <td className="px-3 py-2 text-right font-bold text-sm whitespace-nowrap" style={{border: '2px solid #1f2937'}}>
+                            {formatNumber(perFlat)} {t.currency}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="font-bold" style={{backgroundColor: '#e5e7eb', borderTop: '3px solid #000'}}>
+                      <td
+                        colSpan={4}
+                        className="px-3 py-1 text-sm text-right"
+                        style={{border: '2px solid #1f2937'}}
+                      >
+                        {t.summary.perFlat} ({t.summary.ownerNote}):
+                      </td>
+                      <td className="px-3 py-1 text-right whitespace-nowrap" style={{border: '2px solid #1f2937'}}>
+                        {formatNumber(summary.perFlatOwnerTotal)} {t.currency}
+                      </td>
+                    </tr>
+                    <tr style={{backgroundColor: '#f3f4f6'}}>
+                      <td
+                        colSpan={5}
+                        className="px-3 py-1 text-right text-xs italic"
+                        style={{border: '2px solid #1f2937', color: '#4b5563'}}
+                      >
+                        {t.summary.inWords}: {numberToWords(summary.perFlatOwnerTotal, language)}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
 
             {/* Categories Table */}
             <div className="mb-8">
@@ -231,13 +359,13 @@ export default function BillPreview({
                     <th className="border border-gray-300 px-3 py-2 text-left text-sm">
                       {t.preview.type}
                     </th>
-                    <th className="border border-gray-300 px-3 py-2 text-right text-sm">
+                    <th className="border border-gray-300 px-3 py-2 text-right text-sm whitespace-nowrap">
                       {t.preview.amount}
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {billData.categories.map((category) => {
+                  {billData.categories.filter(cat => !cat.isOwnerOnly).map((category) => {
                     const perFlat = summary.categoryTotals.get(category.id) || 0;
                     return (
                       <tr key={category.id}>
@@ -255,7 +383,7 @@ export default function BillPreview({
                             ? t.category.singleFlat
                             : `${formatNumber(category.amount)} ÷ ${billData.numberOfFlats}`}
                         </td>
-                        <td className="border border-gray-300 px-3 py-2 text-right font-medium text-sm">
+                        <td className="border border-gray-300 px-3 py-2 text-right font-medium text-sm whitespace-nowrap">
                           {formatNumber(perFlat)} {t.currency}
                         </td>
                       </tr>
@@ -264,13 +392,31 @@ export default function BillPreview({
                 </tbody>
                 <tfoot>
                   <tr className="bg-gray-100 font-bold">
-                    <td
-                      colSpan={4}
-                      className="border border-gray-300 px-3 py-1 text-right text-sm"
-                    >
-                      {t.summary.perFlat}:
-                    </td>
-                    <td className="border border-gray-300 px-1 py-1 text-right">
+                    {summary.perFlatOwnerTotal > 0 ? (
+                      <>
+                        <td
+                          colSpan={2}
+                          className="border border-gray-300 px-2 py-1 text-xs font-normal text-left"
+                          style={{color: '#c2410c'}}
+                        >
+                          {t.summary.ownerNote}: +{formatNumber(summary.perFlatOwnerTotal)} = {formatNumber(summary.perFlatTotal + summary.perFlatOwnerTotal)} {t.currency}
+                        </td>
+                        <td
+                          colSpan={2}
+                          className="border border-gray-300 px-3 py-1 text-sm text-right"
+                        >
+                          {t.summary.perFlat}:
+                        </td>
+                      </>
+                    ) : (
+                      <td
+                        colSpan={4}
+                        className="border border-gray-300 px-3 py-1 text-sm text-right"
+                      >
+                        {t.summary.perFlat}:
+                      </td>
+                    )}
+                    <td className="border border-gray-300 px-3 py-1 text-right whitespace-nowrap">
                       {formatNumber(summary.perFlatTotal)} {t.currency}
                     </td>
                   </tr>
@@ -286,13 +432,31 @@ export default function BillPreview({
                   {/* Garage space variations */}
                   {billData.garage.motorcycleSpaces > 0 && (
                     <tr className="bg-gray-50 font-medium">
-                      <td
-                        colSpan={4}
-                        className="border border-gray-300 px-3 py-1 text-right text-xs"
-                      >
-                        {t.summary.withMotorcycleSpace}:
-                      </td>
-                      <td className="border border-gray-300 px-3 py-1 text-right text-xs">
+                      {summary.perFlatOwnerTotal > 0 ? (
+                        <>
+                          <td
+                            colSpan={2}
+                            className="border border-gray-300 px-2 py-1 text-xs font-normal text-left"
+                            style={{color: '#c2410c'}}
+                          >
+                            {t.summary.ownerNote}: +{formatNumber(summary.perFlatOwnerTotal)} = {formatNumber(summary.totalWithMotorcycle + summary.perFlatOwnerTotal)} {t.currency}
+                          </td>
+                          <td
+                            colSpan={2}
+                            className="border border-gray-300 px-3 py-1 text-xs text-right"
+                          >
+                            {t.summary.withMotorcycleSpace}:
+                          </td>
+                        </>
+                      ) : (
+                        <td
+                          colSpan={4}
+                          className="border border-gray-300 px-3 py-1 text-xs text-right"
+                        >
+                          {t.summary.withMotorcycleSpace}:
+                        </td>
+                      )}
+                      <td className="border border-gray-300 px-3 py-1 text-right text-xs whitespace-nowrap">
                         {formatNumber(summary.totalWithMotorcycle)} {t.currency}
                       </td>
                     </tr>
@@ -300,13 +464,31 @@ export default function BillPreview({
 
                   {billData.garage.carSpaces > 0 && (
                     <tr className="bg-gray-50 font-medium">
-                      <td
-                        colSpan={4}
-                        className="border border-gray-300 px-3 py-1 text-right text-xs"
-                      >
-                        {t.summary.withCarSpace}:
-                      </td>
-                      <td className="border border-gray-300 px-3 py-1 text-right text-xs">
+                      {summary.perFlatOwnerTotal > 0 ? (
+                        <>
+                          <td
+                            colSpan={2}
+                            className="border border-gray-300 px-2 py-1 text-xs font-normal text-left"
+                            style={{color: '#c2410c'}}
+                          >
+                            {t.summary.ownerNote}: +{formatNumber(summary.perFlatOwnerTotal)} = {formatNumber(summary.totalWithCar + summary.perFlatOwnerTotal)} {t.currency}
+                          </td>
+                          <td
+                            colSpan={2}
+                            className="border border-gray-300 px-3 py-1 text-xs text-right"
+                          >
+                            {t.summary.withCarSpace}:
+                          </td>
+                        </>
+                      ) : (
+                        <td
+                          colSpan={4}
+                          className="border border-gray-300 px-3 py-1 text-xs text-right"
+                        >
+                          {t.summary.withCarSpace}:
+                        </td>
+                      )}
+                      <td className="border border-gray-300 px-3 py-1 text-right text-xs whitespace-nowrap">
                         {formatNumber(summary.totalWithCar)} {t.currency}
                       </td>
                     </tr>
@@ -314,38 +496,35 @@ export default function BillPreview({
 
                   {billData.garage.motorcycleSpaces > 0 && billData.garage.carSpaces > 0 && (
                     <tr className="bg-gray-50 font-medium">
-                      <td
-                        colSpan={4}
-                        className="border border-gray-300 px-3 py-1 text-right text-xs"
-                      >
-                        {t.summary.withBothSpaces}:
-                      </td>
-                      <td className="border border-gray-300 px-3 py-1 text-right text-xs">
+                      {summary.perFlatOwnerTotal > 0 ? (
+                        <>
+                          <td
+                            colSpan={2}
+                            className="border border-gray-300 px-2 py-1 text-xs font-normal text-left"
+                            style={{color: '#c2410c'}}
+                          >
+                            {t.summary.ownerNote}: +{formatNumber(summary.perFlatOwnerTotal)} = {formatNumber(summary.totalWithBoth + summary.perFlatOwnerTotal)} {t.currency}
+                          </td>
+                          <td
+                            colSpan={2}
+                            className="border border-gray-300 px-3 py-1 text-xs text-right"
+                          >
+                            {t.summary.withBothSpaces}:
+                          </td>
+                        </>
+                      ) : (
+                        <td
+                          colSpan={4}
+                          className="border border-gray-300 px-3 py-1 text-xs text-right"
+                        >
+                          {t.summary.withBothSpaces}:
+                        </td>
+                      )}
+                      <td className="border border-gray-300 px-3 py-1 text-right text-xs whitespace-nowrap">
                         {formatNumber(summary.totalWithBoth)} {t.currency}
                       </td>
                     </tr>
                   )}
-
-                  <tr className="bg-gray-200 font-bold">
-                    <td
-                      colSpan={4}
-                      className="border border-gray-300 px-3 py-2 text-right text-sm"
-                    >
-                      {t.summary.totalFlatCollection} ({billData.numberOfFlats}{' '}
-                      {uiMsgs.flats}):
-                    </td>
-                    <td className="border border-gray-300 px-3 py-2 text-right text-base">
-                      {formatNumber(summary.grandTotal)} {t.currency}
-                    </td>
-                  </tr>
-                  <tr className="bg-gray-100">
-                    <td
-                      colSpan={5}
-                      className="border border-gray-300 px-3 py-1 text-right text-xs text-gray-600 italic"
-                    >
-                      {t.summary.inWords}: {numberToWords(summary.grandTotal, language)}
-                    </td>
-                  </tr>
                 </tfoot>
               </table>
             </div>
@@ -372,10 +551,9 @@ export default function BillPreview({
                         </p>
                         {billData.garage.motorcycleSpaceNotes && (
                           <div className="pt-1 border-t border-gray-400 mt-1">
-                            <p className="font-medium">{t.form.motorcycleSpaceNotes}:</p>
-                            <pre className="text-xs text-gray-700 whitespace-pre-wrap font-sans mt-0.5">
-                              {billData.garage.motorcycleSpaceNotes}
-                            </pre>
+                            <p className="text-xs text-gray-700">
+                              <span className="font-medium">{t.form.motorcycleSpaceNotes}:</span> {billData.garage.motorcycleSpaceNotes}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -397,10 +575,9 @@ export default function BillPreview({
                         </p>
                         {billData.garage.carSpaceNotes && (
                           <div className="pt-1 border-t border-gray-400 mt-1">
-                            <p className="font-medium">{t.form.carSpaceNotes}:</p>
-                            <pre className="text-xs text-gray-700 whitespace-pre-wrap font-sans mt-0.5">
-                              {billData.garage.carSpaceNotes}
-                            </pre>
+                            <p className="text-xs text-gray-700">
+                              <span className="font-medium">{t.form.carSpaceNotes}:</span> {billData.garage.carSpaceNotes}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -417,28 +594,53 @@ export default function BillPreview({
             )}
 
             {/* Combined Total Collection */}
-            {(billData.garage.motorcycleSpaces > 0 || billData.garage.carSpaces > 0) && (
-              <div className="mb-6 p-4 bg-blue-50 rounded border-2 border-blue-300">
-                <h2 className="text-base font-bold text-gray-900 mb-3">{t.summary.combinedTotal}</h2>
-                <div className="grid grid-cols-2 gap-3 text-sm mb-3">
-                  <div>
-                    <p className="text-gray-600">{t.summary.totalFlatCollection}:</p>
-                    <p className="font-bold text-gray-900">{formatNumber(summary.grandTotal)} {t.currency}</p>
+            {(billData.garage.motorcycleSpaces > 0 || billData.garage.carSpaces > 0 || summary.grandOwnerTotal > 0) && (() => {
+              const hasGarage = (billData.garage.motorcycleSpaces > 0 || billData.garage.carSpaces > 0);
+              const hasOwner = summary.grandOwnerTotal > 0;
+              const garageTotal = (billData.garage.motorcycleSpaces * billData.garage.motorcycleSpaceAmount) + (billData.garage.carSpaces * billData.garage.carSpaceAmount);
+              const combinedTotal = summary.grandTotal + garageTotal + summary.grandOwnerTotal;
+
+              // Determine grid columns based on what's present
+              const gridColsClass = hasGarage && hasOwner ? 'grid-cols-3' :
+                                    (hasGarage || hasOwner) ? 'grid-cols-2' :
+                                    'grid-cols-1';
+
+              return (
+                <div className="mb-6 p-4 bg-blue-50 rounded border-2 border-blue-300">
+                  <h2 className="text-base font-bold text-gray-900 mb-3">{t.summary.combinedTotal}</h2>
+                  <div className={`grid ${gridColsClass} gap-3 text-sm mb-3`}>
+                    <div>
+                      <p className="text-gray-600">{t.summary.totalFlatCollection}:</p>
+                      <p className="font-bold text-gray-900">{formatNumber(summary.grandTotal)} {t.currency}</p>
+                    </div>
+                    {hasGarage && (
+                      <div>
+                        <p className="text-gray-600">{t.summary.totalGarageCollection}:</p>
+                        <p className="font-bold text-gray-900">{formatNumber(garageTotal)} {t.currency}</p>
+                      </div>
+                    )}
+                    {hasOwner && (
+                      <div>
+                        <p className="text-gray-600">{t.summary.ownerCollection}:</p>
+                        <p className="font-bold text-gray-900">{formatNumber(summary.grandOwnerTotal)} {t.currency}</p>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <p className="text-gray-600">{t.summary.totalGarageCollection}:</p>
-                    <p className="font-bold text-gray-900">{formatNumber((billData.garage.motorcycleSpaces * billData.garage.motorcycleSpaceAmount) + (billData.garage.carSpaces * billData.garage.carSpaceAmount))} {t.currency}</p>
+                  <div className="pt-3 border-t-2 border-blue-400">
+                    <p className="text-gray-700 text-sm font-medium">
+                      {hasGarage && hasOwner ? t.summary.flatsPlusGarageAndOwner :
+                       hasGarage ? t.summary.flatsPlusGarage :
+                       hasOwner ? t.summary.flatsPlusOwner :
+                       t.summary.totalFlatCollection}:
+                    </p>
+                    <p className="font-bold text-xl text-gray-900">{formatNumber(combinedTotal)} {t.currency}</p>
+                    <p className="text-xs text-gray-600 italic mt-2">
+                      {t.summary.inWords}: {numberToWords(combinedTotal, language)}
+                    </p>
                   </div>
                 </div>
-                <div className="pt-3 border-t-2 border-blue-400">
-                  <p className="text-gray-700 text-sm font-medium">{t.summary.flatsPlusGarage}:</p>
-                  <p className="font-bold text-xl text-gray-900">{formatNumber(summary.grandTotal + (billData.garage.motorcycleSpaces * billData.garage.motorcycleSpaceAmount) + (billData.garage.carSpaces * billData.garage.carSpaceAmount))} {t.currency}</p>
-                  <p className="text-xs text-gray-600 italic mt-2">
-                    {t.summary.inWords}: {numberToWords(summary.grandTotal + (billData.garage.motorcycleSpaces * billData.garage.motorcycleSpaceAmount) + (billData.garage.carSpaces * billData.garage.carSpaceAmount), language)}
-                  </p>
-                </div>
-              </div>
-            )}
+              );
+            })()}
 
             {/* Payment Info */}
             {billData.paymentInfo && (
@@ -498,6 +700,21 @@ export default function BillPreview({
         <div className="flex justify-between items-center p-3 md:p-4 border-b bg-gray-50 flex-wrap gap-2">
           <h2 className="text-lg md:text-xl font-bold text-gray-900">{t.preview.title}</h2>
           <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={handleShare}
+              className="px-3 py-2 text-sm md:px-4 md:text-base bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2"
+            >
+              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                />
+              </svg>
+              <span className="hidden sm:inline">{t.actions.share}</span>
+              <span className="sm:hidden">{t.actions.share}</span>
+            </button>
             <button
               onClick={handleDownloadPDF}
               className="px-3 py-2 text-sm md:px-4 md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"

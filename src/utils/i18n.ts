@@ -116,6 +116,8 @@ export const getUIMessages = (language: string) => {
       generatedFrom: 'Generated from',
       imageGenerationError: 'Failed to generate image. Please try again.',
       pdfGenerationError: 'Failed to generate PDF. Please try again.',
+      shareNotSupported: 'Sharing is not supported on this browser',
+      shareError: 'Failed to share the bill. Please try again.',
     },
     bn: {
       quickGuide: 'গাইড',
@@ -126,6 +128,8 @@ export const getUIMessages = (language: string) => {
       generatedFrom: 'তৈরি হয়েছে',
       imageGenerationError: 'ছবি তৈরি করতে ব্যর্থ। আবার চেষ্টা করুন।',
       pdfGenerationError: 'পিডিএফ তৈরি করতে ব্যর্থ। আবার চেষ্টা করুন।',
+      shareNotSupported: 'এই ব্রাউজারে শেয়ার সমর্থিত নয়',
+      shareError: 'বিল শেয়ার করতে ব্যর্থ। আবার চেষ্টা করুন।',
     },
     // Add new languages here:
     // hi: {

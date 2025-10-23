@@ -761,6 +761,11 @@ export default function BillCalculator() {
                   <p className="text-xs opacity-75 mt-2">
                     {t.summary.inWords}: {numberToWords(summary.perFlatTotal, language)}
                   </p>
+                  {summary.perFlatOwnerTotal > 0 && (
+                    <p className="text-xs text-orange-300 mt-1">
+                      ({t.summary.ownerNote}: +{formatNumber(summary.perFlatOwnerTotal)} = {formatNumber(summary.perFlatTotal + summary.perFlatOwnerTotal)} {t.currency})
+                    </p>
+                  )}
                 </div>
 
                 {/* Garage Space Variations */}
@@ -770,6 +775,14 @@ export default function BillCalculator() {
                     <p className="text-2xl font-bold mt-1">
                       {formatNumber(summary.totalWithMotorcycle)} {t.currency}
                     </p>
+                    <p className="text-xs opacity-75 mt-2">
+                      {t.summary.inWords}: {numberToWords(summary.totalWithMotorcycle, language)}
+                    </p>
+                    {summary.perFlatOwnerTotal > 0 && (
+                      <p className="text-xs text-orange-300 mt-1">
+                        ({t.summary.ownerNote}: +{formatNumber(summary.perFlatOwnerTotal)} = {formatNumber(summary.totalWithMotorcycle + summary.perFlatOwnerTotal)} {t.currency})
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -779,6 +792,14 @@ export default function BillCalculator() {
                     <p className="text-2xl font-bold mt-1">
                       {formatNumber(summary.totalWithCar)} {t.currency}
                     </p>
+                    <p className="text-xs opacity-75 mt-2">
+                      {t.summary.inWords}: {numberToWords(summary.totalWithCar, language)}
+                    </p>
+                    {summary.perFlatOwnerTotal > 0 && (
+                      <p className="text-xs text-orange-300 mt-1">
+                        ({t.summary.ownerNote}: +{formatNumber(summary.perFlatOwnerTotal)} = {formatNumber(summary.totalWithCar + summary.perFlatOwnerTotal)} {t.currency})
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -788,26 +809,16 @@ export default function BillCalculator() {
                     <p className="text-2xl font-bold mt-1">
                       {formatNumber(summary.totalWithBoth)} {t.currency}
                     </p>
+                    <p className="text-xs opacity-75 mt-2">
+                      {t.summary.inWords}: {numberToWords(summary.totalWithBoth, language)}
+                    </p>
+                    {summary.perFlatOwnerTotal > 0 && (
+                      <p className="text-xs text-orange-300 mt-1">
+                        ({t.summary.ownerNote}: +{formatNumber(summary.perFlatOwnerTotal)} = {formatNumber(summary.totalWithBoth + summary.perFlatOwnerTotal)} {t.currency})
+                      </p>
+                    )}
                   </div>
                 )}
-              </div>
-            </div>
-
-            {/* Total Amount Section */}
-            <div>
-              <h3 className="text-lg font-semibold mb-3 border-b border-white/30 pb-2">{t.summary.totalAmount}
-              {(billData.garage.motorcycleSpaces > 0 || billData.garage.carSpaces > 0) ? ` (${t.summary.withoutGarage})`: ''}
-              </h3>
-              <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                <p className="text-xl font-bold">
-                  {billData.numberOfFlats} × {formatNumber(summary.perFlatTotal)}
-                </p>
-                <p className="text-4xl font-bold mt-2">
-                  = {formatNumber(summary.grandTotal)} {t.currency}
-                </p>
-                <p className="text-sm opacity-75 mt-3">
-                  {t.summary.inWords}: {numberToWords(summary.grandTotal, language)}
-                </p>
               </div>
             </div>
 
@@ -842,35 +853,63 @@ export default function BillCalculator() {
               </div>
             )}
 
-            {/* Combined Total (Flats + Garage) */}
-            {(billData.garage.motorcycleSpaces > 0 || billData.garage.carSpaces > 0) && (
-              <div className="mt-6 pt-6 border-t-2 border-white/30">
-                <h3 className="text-xl font-bold mb-3">{t.summary.combinedTotal}</h3>
-                <div className="grid grid-cols-2 gap-4 text-base mb-3">
-                  <div>
-                    <p className="opacity-90">{t.summary.totalFlatCollection}:</p>
-                    <p className="font-bold text-xl">
-                      {formatNumber(summary.grandTotal)} {t.currency}
-                    </p>
+            {/* Combined Total (Flats + Garage + Owner) */}
+            {(() => {
+              const hasGarage = (billData.garage.motorcycleSpaces > 0 || billData.garage.carSpaces > 0);
+              const hasOwner = summary.grandOwnerTotal > 0;
+
+              if (!hasGarage && !hasOwner) return null;
+
+              const garageTotal = (billData.garage.motorcycleSpaces * billData.garage.motorcycleSpaceAmount) + (billData.garage.carSpaces * billData.garage.carSpaceAmount);
+              const combinedTotal = summary.grandTotal + garageTotal + summary.grandOwnerTotal;
+              const gridColsClass = hasGarage && hasOwner ? 'grid-cols-3' :
+                                    (hasGarage || hasOwner) ? 'grid-cols-2' :
+                                    'grid-cols-1';
+
+              return (
+                <div className="mt-6 pt-6 border-t-2 border-white/30">
+                  <h3 className="text-xl font-bold mb-3">{t.summary.combinedTotal}</h3>
+                  <div className={`grid ${gridColsClass} gap-4 text-base mb-3`}>
+                    <div>
+                      <p className="opacity-90">{t.summary.totalFlatCollection}:</p>
+                      <p className="font-bold text-xl">
+                        {formatNumber(summary.grandTotal)} {t.currency}
+                      </p>
+                    </div>
+                    {hasGarage && (
+                      <div>
+                        <p className="opacity-90">{t.summary.totalGarageCollection}:</p>
+                        <p className="font-bold text-xl">
+                          {formatNumber(garageTotal)} {t.currency}
+                        </p>
+                      </div>
+                    )}
+                    {hasOwner && (
+                      <div>
+                        <p className="opacity-90">{t.summary.ownerCollection}:</p>
+                        <p className="font-bold text-xl">
+                          {formatNumber(summary.grandOwnerTotal)} {t.currency}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <p className="opacity-90">{t.summary.totalGarageCollection}:</p>
-                    <p className="font-bold text-xl">
-                      {formatNumber((billData.garage.motorcycleSpaces * billData.garage.motorcycleSpaceAmount) + (billData.garage.carSpaces * billData.garage.carSpaceAmount))} {t.currency}
+                  <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
+                    <p className="opacity-90 text-base">
+                      {hasGarage && hasOwner ? t.summary.flatsPlusGarageAndOwner :
+                       hasGarage ? t.summary.flatsPlusGarage :
+                       hasOwner ? t.summary.flatsPlusOwner :
+                       t.summary.totalFlatCollection}:
+                    </p>
+                    <p className="font-bold text-3xl mt-1">
+                      {formatNumber(combinedTotal)} {t.currency}
+                    </p>
+                    <p className="text-sm opacity-75 mt-3">
+                      {t.summary.inWords}: {numberToWords(combinedTotal, language)}
                     </p>
                   </div>
                 </div>
-                <div className="bg-white/20 backdrop-blur-sm rounded-lg p-4">
-                  <p className="opacity-90 text-base">{t.summary.flatsPlusGarage}:</p>
-                  <p className="font-bold text-3xl mt-1">
-                    {formatNumber(summary.grandTotal + (billData.garage.motorcycleSpaces * billData.garage.motorcycleSpaceAmount) + (billData.garage.carSpaces * billData.garage.carSpaceAmount))} {t.currency}
-                  </p>
-                  <p className="text-sm opacity-75 mt-3">
-                    {t.summary.inWords}: {numberToWords(summary.grandTotal + (billData.garage.motorcycleSpaces * billData.garage.motorcycleSpaceAmount) + (billData.garage.carSpaces * billData.garage.carSpaceAmount), language)}
-                  </p>
-                </div>
-              </div>
-            )}
+              );
+            })()}
           </div>
         )}
 

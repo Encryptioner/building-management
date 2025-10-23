@@ -5,7 +5,8 @@ export function calculateBillSummary(
   numberOfFlats: number,
   garage: GarageSpace
 ): BillSummary {
-  let perFlatTotal = 0;
+  let perFlatTotal = 0; // For non-owner categories
+  let perFlatOwnerTotal = 0; // For owner-only categories
   const categoryTotals = new Map<string, number>();
 
   categories.forEach((category) => {
@@ -19,17 +20,25 @@ export function calculateBillSummary(
       categoryPerFlat = numberOfFlats > 0 ? Math.ceil(category.amount / numberOfFlats) : 0;
     }
 
-    perFlatTotal += categoryPerFlat;
+    // Separate owner-only categories from regular categories
+    if (category.isOwnerOnly) {
+      perFlatOwnerTotal += categoryPerFlat;
+    } else {
+      perFlatTotal += categoryPerFlat;
+    }
+
     categoryTotals.set(category.id, categoryPerFlat);
   });
 
-  // Round up per flat total to nearest integer
+  // Round up per flat totals to nearest integer
   perFlatTotal = Math.ceil(perFlatTotal);
+  perFlatOwnerTotal = Math.ceil(perFlatOwnerTotal);
 
-  // Grand total is also rounded up
+  // Grand totals
   const grandTotal = Math.ceil(perFlatTotal * numberOfFlats);
+  const grandOwnerTotal = Math.ceil(perFlatOwnerTotal * numberOfFlats);
 
-  // Calculate totals with garage spaces
+  // Calculate totals with garage spaces (not including owner charges)
   const totalWithMotorcycle = perFlatTotal + garage.motorcycleSpaceAmount;
   const totalWithCar = perFlatTotal + garage.carSpaceAmount;
   const totalWithBoth = perFlatTotal + garage.motorcycleSpaceAmount + garage.carSpaceAmount;
@@ -37,6 +46,8 @@ export function calculateBillSummary(
   return {
     perFlatTotal,
     grandTotal,
+    perFlatOwnerTotal,
+    grandOwnerTotal,
     totalWithMotorcycle,
     totalWithCar,
     totalWithBoth,

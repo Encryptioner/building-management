@@ -115,6 +115,27 @@ export default function CategoryForm({
             )}
           </div>
         )}
+
+        {/* Owner Only Checkbox */}
+        <div className="md:col-span-2">
+          <div className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
+            <input
+              type="checkbox"
+              id={`isOwnerOnly-${category.id}`}
+              checked={category.isOwnerOnly ?? false}
+              onChange={(e) => onUpdate({ isOwnerOnly: e.target.checked })}
+              className="cursor-pointer mt-1 w-4 h-4 text-orange-600 border-gray-300 rounded focus:ring-2 focus:ring-orange-500"
+            />
+            <label htmlFor={`isOwnerOnly-${category.id}`} className="flex-1 cursor-pointer">
+              <span className="block text-sm font-medium text-gray-700">
+                {t.category.isOwnerOnly}
+              </span>
+              <span className="block text-xs text-gray-500 mt-1">
+                {t.category.isOwnerOnlyHelp}
+              </span>
+            </label>
+          </div>
+        </div>
       </div>
 
       {/* Remove Button */}

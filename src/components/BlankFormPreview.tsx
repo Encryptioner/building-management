@@ -204,71 +204,166 @@ export default function BlankFormPreview({
         </p>
       </div>
 
-      {/* Categories Table - Blank Form */}
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">
-          {t.category.title}
-        </h2>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-3 py-2 text-left text-sm">
-                {t.preview.category}
-              </th>
-              <th className="border border-gray-300 px-3 py-2 text-left text-sm">
-                {t.preview.duration}
-              </th>
-              <th className="border border-gray-300 px-3 py-2 text-left text-sm">
-                {t.preview.info}
-              </th>
-              <th className="border border-gray-300 px-3 py-2 text-left text-sm">
-                {t.preview.type}
-              </th>
-              <th className="border border-gray-300 px-3 py-2 text-right text-sm">
-                {t.preview.amount}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {billData.categories.map((category) => {
-              return (
-                <tr key={category.id}>
-                  <td className="border border-gray-300 px-3 py-2 font-medium text-sm">
-                    {category.name}
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2 text-xs">
-                    {category.duration}
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2 text-xs">
-                    {category.info}
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2 text-xs">
-                    {category.billType === 'single-flat'
-                      ? t.category.singleFlat
-                      : t.category.allBuilding}
-                  </td>
-                  <td className="border border-gray-300 px-3 py-2 text-right font-medium text-sm">
-                    <div className="min-h-[24px] border-b border-gray-400 border-dashed"></div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
+      {/* Owner-Only Categories Table - Blank Form */}
+      {billData.categories.some(cat => cat.isOwnerOnly) && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <span>{t.summary.ownerCollection}</span>
+            <span className="text-sm font-normal text-orange-700">({t.category.isOwnerOnly})</span>
+          </h2>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-orange-50 border-t-4 border-orange-600 border-b-2 border-gray-800">
+                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-bold">
+                  {t.preview.category}
+                </th>
+                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-bold">
+                  {t.preview.duration}
+                </th>
+                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-bold">
+                  {t.preview.info}
+                </th>
+                <th className="border border-gray-300 px-3 py-2 text-left text-sm font-bold">
+                  {t.preview.type}
+                </th>
+                <th className="border border-gray-300 px-3 py-2 text-right text-sm font-bold">
+                  {t.preview.amount}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {billData.categories.filter(cat => cat.isOwnerOnly).map((category) => {
+                return (
+                  <tr key={category.id}>
+                    <td className="border border-gray-300 px-3 py-2 font-bold text-sm bg-orange-50">
+                      {category.name}
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-xs">
+                      {category.duration}
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-xs">
+                      {category.info}
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-xs">
+                      {category.billType === 'single-flat'
+                        ? t.category.singleFlat
+                        : t.category.allBuilding}
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-medium text-sm">
+                      <div className="min-h-[24px] border-b border-gray-400 border-dashed"></div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+            <tfoot>
+              <tr className="bg-orange-50 font-bold border-t-2 border-gray-800">
+                <td
+                  colSpan={4}
+                  className="border border-gray-300 px-3 py-1 text-sm text-right"
+                >
+                  {t.summary.perFlat} ({t.summary.ownerNote}):
+                </td>
+                <td className="border border-gray-300 px-3 py-1 text-right font-medium text-sm">
+                  <div className="min-h-[24px] border-b border-gray-400 border-dashed"></div>
+                </td>
+              </tr>
+              <tr className="bg-gray-50">
+                <td
+                  colSpan={5}
+                  className="border border-gray-300 px-3 py-1 text-right text-xs text-gray-600 italic"
+                >
+                  {t.summary.inWords}: <span className="inline-block min-w-[300px] border-b border-gray-400 border-dashed ml-2"></span>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      )}
+
+      {/* Regular Categories Table - Blank Form */}
+      {billData.categories.some(cat => !cat.isOwnerOnly) && (
+        <div className="mb-8">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">
+            {t.category.title}
+          </h2>
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-gray-100">
+                <th className="border border-gray-300 px-3 py-2 text-left text-sm">
+                  {t.preview.category}
+                </th>
+                <th className="border border-gray-300 px-3 py-2 text-left text-sm">
+                  {t.preview.duration}
+                </th>
+                <th className="border border-gray-300 px-3 py-2 text-left text-sm">
+                  {t.preview.info}
+                </th>
+                <th className="border border-gray-300 px-3 py-2 text-left text-sm">
+                  {t.preview.type}
+                </th>
+                <th className="border border-gray-300 px-3 py-2 text-right text-sm">
+                  {t.preview.amount}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {billData.categories.filter(cat => !cat.isOwnerOnly).map((category) => {
+                return (
+                  <tr key={category.id}>
+                    <td className="border border-gray-300 px-3 py-2 font-medium text-sm">
+                      {category.name}
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-xs">
+                      {category.duration}
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-xs">
+                      {category.info}
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-xs">
+                      {category.billType === 'single-flat'
+                        ? t.category.singleFlat
+                        : t.category.allBuilding}
+                    </td>
+                    <td className="border border-gray-300 px-3 py-2 text-right font-medium text-sm">
+                      <div className="min-h-[24px] border-b border-gray-400 border-dashed"></div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
           <tfoot>
             <tr className="bg-gray-100 font-bold">
-              <td
-                colSpan={4}
-                className="border border-gray-300 px-3 py-1 text-right text-sm"
-              >
-                {t.summary.perFlat}:
-              </td>
+              {billData.categories.some(cat => cat.isOwnerOnly) ? (
+                <>
+                  <td
+                    colSpan={2}
+                    className="border border-gray-300 px-2 py-1 text-xs text-orange-700 font-normal text-left"
+                  >
+                    {t.summary.ownerNote}: +<span className="inline-block min-w-[50px] border-b border-orange-400 border-dashed mx-1"></span> = <span className="inline-block min-w-[50px] border-b border-orange-400 border-dashed mx-1"></span>
+                  </td>
+                  <td
+                    colSpan={2}
+                    className="border border-gray-300 px-3 py-1 text-sm text-right"
+                  >
+                    {t.summary.perFlat}:
+                  </td>
+                </>
+              ) : (
+                <td
+                  colSpan={4}
+                  className="border border-gray-300 px-3 py-1 text-sm text-right"
+                >
+                  {t.summary.perFlat}:
+                </td>
+              )}
               <td className="border border-gray-300 px-1 py-1 text-right">
                 <div className="min-h-[28px] border-b-2 border-gray-500 border-dashed"></div>
               </td>
             </tr>
             <tr className="bg-gray-50">
               <td
-                colSpan={6}
+                colSpan={5}
                 className="border border-gray-300 px-3 py-1 text-right text-xs text-gray-600 italic"
               >
                 {t.summary.inWords}: <span className="inline-block min-w-[300px] border-b border-gray-400 border-dashed ml-2"></span>
@@ -278,12 +373,29 @@ export default function BlankFormPreview({
             {/* Garage space variations - with blank spaces - only show if enabled */}
             {billData.showMotorcycleInBlankForm && (
               <tr className="bg-gray-50 font-medium">
-                <td
-                  colSpan={4}
-                  className="border border-gray-300 px-3 py-1 text-right text-xs"
-                >
-                  {t.summary.withMotorcycleSpace}:
-                </td>
+                {billData.categories.some(cat => cat.isOwnerOnly) ? (
+                  <>
+                    <td
+                      colSpan={2}
+                      className="border border-gray-300 px-2 py-1 text-xs text-orange-700 font-normal text-left"
+                    >
+                      {t.summary.ownerNote}: +<span className="inline-block min-w-[40px] border-b border-orange-400 border-dashed mx-1"></span> = <span className="inline-block min-w-[40px] border-b border-orange-400 border-dashed mx-1"></span>
+                    </td>
+                    <td
+                      colSpan={2}
+                      className="border border-gray-300 px-3 py-1 text-xs text-right"
+                    >
+                      {t.summary.withMotorcycleSpace}:
+                    </td>
+                  </>
+                ) : (
+                  <td
+                    colSpan={4}
+                    className="border border-gray-300 px-3 py-1 text-xs text-right"
+                  >
+                    {t.summary.withMotorcycleSpace}:
+                  </td>
+                )}
                 <td className="border border-gray-300 px-3 py-1 text-right text-xs">
                   <div className="min-h-[24px] border-b border-gray-400 border-dashed"></div>
                 </td>
@@ -292,12 +404,29 @@ export default function BlankFormPreview({
 
             {billData.showCarInBlankForm && (
               <tr className="bg-gray-50 font-medium">
-                <td
-                  colSpan={4}
-                  className="border border-gray-300 px-3 py-1 text-right text-xs"
-                >
-                  {t.summary.withCarSpace}:
-                </td>
+                {billData.categories.some(cat => cat.isOwnerOnly) ? (
+                  <>
+                    <td
+                      colSpan={2}
+                      className="border border-gray-300 px-2 py-1 text-xs text-orange-700 font-normal text-left"
+                    >
+                      {t.summary.ownerNote}: +<span className="inline-block min-w-[40px] border-b border-orange-400 border-dashed mx-1"></span> = <span className="inline-block min-w-[40px] border-b border-orange-400 border-dashed mx-1"></span>
+                    </td>
+                    <td
+                      colSpan={2}
+                      className="border border-gray-300 px-3 py-1 text-xs text-right"
+                    >
+                      {t.summary.withCarSpace}:
+                    </td>
+                  </>
+                ) : (
+                  <td
+                    colSpan={4}
+                    className="border border-gray-300 px-3 py-1 text-xs text-right"
+                  >
+                    {t.summary.withCarSpace}:
+                  </td>
+                )}
                 <td className="border border-gray-300 px-3 py-1 text-right text-xs">
                   <div className="min-h-[24px] border-b border-gray-400 border-dashed"></div>
                 </td>
@@ -306,41 +435,38 @@ export default function BlankFormPreview({
 
             {billData.showMotorcycleInBlankForm && billData.showCarInBlankForm && (
               <tr className="bg-gray-50 font-medium">
-                <td
-                  colSpan={4}
-                  className="border border-gray-300 px-3 py-1 text-right text-xs"
-                >
-                  {t.summary.withBothSpaces}:
-                </td>
+                {billData.categories.some(cat => cat.isOwnerOnly) ? (
+                  <>
+                    <td
+                      colSpan={2}
+                      className="border border-gray-300 px-2 py-1 text-xs text-orange-700 font-normal text-left"
+                    >
+                      {t.summary.ownerNote}: +<span className="inline-block min-w-[40px] border-b border-orange-400 border-dashed mx-1"></span> = <span className="inline-block min-w-[40px] border-b border-orange-400 border-dashed mx-1"></span>
+                    </td>
+                    <td
+                      colSpan={2}
+                      className="border border-gray-300 px-3 py-1 text-xs text-right"
+                    >
+                      {t.summary.withBothSpaces}:
+                    </td>
+                  </>
+                ) : (
+                  <td
+                    colSpan={4}
+                    className="border border-gray-300 px-3 py-1 text-xs text-right"
+                  >
+                    {t.summary.withBothSpaces}:
+                  </td>
+                )}
                 <td className="border border-gray-300 px-3 py-1 text-right text-xs">
                   <div className="min-h-[24px] border-b border-gray-400 border-dashed"></div>
                 </td>
               </tr>
             )}
-
-            <tr className="bg-gray-200 font-bold">
-              <td
-                colSpan={4}
-                className="border border-gray-300 px-3 py-2 text-right text-sm"
-              >
-                {t.summary.totalFlatCollection} (<span className="inline-block min-w-[40px] border-b border-gray-500 border-dashed mx-1"></span>{' '}
-                {uiMsgs.flats}):
-              </td>
-              <td className="border border-gray-300 px-3 py-2 text-right text-base">
-                <div className="min-h-[28px] border-b-2 border-gray-600 border-dashed"></div>
-              </td>
-            </tr>
-            <tr className="bg-gray-100">
-              <td
-                colSpan={5}
-                className="border border-gray-300 px-3 py-1 text-right text-xs text-gray-600 italic"
-              >
-                {t.summary.inWords}: <span className="inline-block min-w-[300px] border-b border-gray-400 border-dashed ml-2"></span>
-              </td>
-            </tr>
           </tfoot>
         </table>
-      </div>
+        </div>
+      )}
 
       {/* Garage Space Information - Blank Form - Only show if either is enabled */}
       {(billData.showMotorcycleInBlankForm || billData.showCarInBlankForm) && (
@@ -349,7 +475,7 @@ export default function BlankFormPreview({
             <h2 className="text-lg font-bold text-gray-900 mb-3">
               {t.summary.garageCollection}
             </h2>
-            <div className={`grid ${billData.showMotorcycleInBlankForm && billData.showCarInBlankForm ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {billData.showMotorcycleInBlankForm && (
                 <div className="p-3 bg-gray-100 rounded border border-gray-300">
                   <h3 className="font-bold text-gray-900 mb-2 text-sm">{t.form.motorcycleSpaces}</h3>
@@ -408,26 +534,55 @@ export default function BlankFormPreview({
               </div>
             )}
           </div>
+        </>
+      )}
 
-          {/* Combined Total Collection - Blank Form - Only show if garage is enabled */}
+      {/* Combined Total Collection - Blank Form - Only show if garage or owner is enabled */}
+      {(() => {
+        const hasGarage = (billData.showMotorcycleInBlankForm || billData.showCarInBlankForm);
+        const hasOwner = billData.categories.some(cat => cat.isOwnerOnly);
+
+        if (!hasGarage && !hasOwner) return null;
+
+        // Determine grid columns based on what's present
+        const gridColsClass = hasGarage && hasOwner ? 'grid-cols-3' :
+                              (hasGarage || hasOwner) ? 'grid-cols-2' :
+                              'grid-cols-1';
+
+        return (
           <div className="mb-6 p-4 bg-blue-50 rounded border-2 border-blue-300">
             <h2 className="text-base font-bold text-gray-900 mb-3">{t.summary.combinedTotal}</h2>
-            <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+            <div className={`grid ${gridColsClass} gap-3 text-sm mb-3`}>
               <div>
                 <p className="text-gray-600">{t.summary.totalFlatCollection}:</p>
                 <p className="font-bold text-gray-900">
-                  <span className="inline-block min-w-[100px] border-b border-gray-500 border-dashed"></span> {t.currency}
+                  <span className="inline-block min-w-[80px] border-b border-gray-500 border-dashed"></span> {t.currency}
                 </p>
               </div>
-              <div>
-                <p className="text-gray-600">{t.summary.totalGarageCollection}:</p>
-                <p className="font-bold text-gray-900">
-                  <span className="inline-block min-w-[100px] border-b border-gray-500 border-dashed"></span> {t.currency}
-                </p>
-              </div>
+              {hasGarage && (
+                <div>
+                  <p className="text-gray-600">{t.summary.totalGarageCollection}:</p>
+                  <p className="font-bold text-gray-900">
+                    <span className="inline-block min-w-[80px] border-b border-gray-500 border-dashed"></span> {t.currency}
+                  </p>
+                </div>
+              )}
+              {hasOwner && (
+                <div>
+                  <p className="text-gray-600">{t.summary.ownerCollection}:</p>
+                  <p className="font-bold text-gray-900">
+                    <span className="inline-block min-w-[80px] border-b border-gray-500 border-dashed"></span> {t.currency}
+                  </p>
+                </div>
+              )}
             </div>
             <div className="pt-3 border-t-2 border-blue-400">
-              <p className="text-gray-700 text-sm font-medium">{t.summary.flatsPlusGarage}:</p>
+              <p className="text-gray-700 text-sm font-medium">
+                {hasGarage && hasOwner ? t.summary.flatsPlusGarageAndOwner :
+                 hasGarage ? t.summary.flatsPlusGarage :
+                 hasOwner ? t.summary.flatsPlusOwner :
+                 t.summary.totalFlatCollection}:
+              </p>
               <p className="font-bold text-xl text-gray-900">
                 <span className="inline-block min-w-[150px] border-b-2 border-gray-600 border-dashed"></span> {t.currency}
               </p>
@@ -436,8 +591,8 @@ export default function BlankFormPreview({
               </p>
             </div>
           </div>
-        </>
-      )}
+        );
+      })()}
 
       {/* Payment Info */}
       {billData.paymentInfo && (

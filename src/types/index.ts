@@ -7,6 +7,7 @@ export interface ServiceCategory {
   info: string;
   billType: BillType;
   amount: number;
+  isOwnerOnly?: boolean; // If true, this charge applies only to flat owners
 }
 
 export interface GarageSpace {
@@ -30,8 +31,10 @@ export interface BillData {
 }
 
 export interface BillSummary {
-  perFlatTotal: number;
-  grandTotal: number;
+  perFlatTotal: number; // Per flat total for non-owner categories
+  grandTotal: number; // Grand total for all flats (non-owner categories)
+  perFlatOwnerTotal: number; // Per flat total for owner-only categories
+  grandOwnerTotal: number; // Grand total for owner-only categories (all flats)
   totalWithMotorcycle: number;
   totalWithCar: number;
   totalWithBoth: number;
