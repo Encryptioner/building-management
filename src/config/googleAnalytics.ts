@@ -11,7 +11,7 @@ export const GOOGLE_ANALYTICS_CONFIG = {
    * Your Google Analytics 4 Measurement ID
    * Get it from: https://analytics.google.com/ > Admin > Data Streams
    */
-  measurementId: 'G-XXXXXXXXXX', // Replace with your GA4 Measurement ID
+  measurementId: 'G-NGJKCGB07D', // Replace with your GA4 Measurement ID
 
   /**
    * Enable/disable Google Analytics
