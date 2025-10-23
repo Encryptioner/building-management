@@ -249,11 +249,14 @@ export default function BillPreview({
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
                 {billData.title || t.header.title}
               </h1>
-              <p className="text-sm text-gray-600 mb-1">
-                {t.preview.printedOn}: {currentDate}
-              </p>
               <p className="text-sm font-semibold text-blue-600">
                 {uiMsgs.numberOfFlats}: {billData.numberOfFlats}
+              </p>
+              <p className="text-xs text-gray-500 italic mt-2">
+                {t.summary.roundingNote}
+              </p>
+              <p className="text-xs text-gray-500 italic mt-2">
+                {t.preview.printedOn}: {currentDate}
               </p>
             </div>
 

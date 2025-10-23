@@ -202,6 +202,9 @@ export default function BlankFormPreview({
         <p className="text-sm font-semibold text-blue-600">
           {uiMsgs.numberOfFlats}: <span className="inline-block min-w-[60px] border-b-2 border-blue-500 border-dashed mx-1"></span>
         </p>
+        <p className="text-xs text-gray-500 italic mt-2">
+          {t.summary.roundingNote}
+        </p>
       </div>
 
       {/* Owner-Only Categories Table - Blank Form */}

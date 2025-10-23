@@ -86,6 +86,7 @@ export const en = {
     flatsPlusGarage: 'Flats + Garage',
     flatsPlusOwner: 'Flats + Owner',
     inWords: 'In Words',
+    roundingNote: '* All amounts are rounded up to the nearest whole number',
   },
   actions: {
     loadExample: 'Load Example Data',

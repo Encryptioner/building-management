@@ -733,6 +733,7 @@ export default function BillCalculator() {
                 onRemove={() => removeCategory(category.id)}
                 validationErrors={validationErrors.categories?.[category.id]}
                 isBlankMode={formMode === 'blank'}
+                onAddNew={addCategory}
               />
             ))}
           </div>
@@ -747,7 +748,10 @@ export default function BillCalculator() {
         {/* Summary */}
         {formMode === 'calculated' && billData.categories.length > 0 && billData.numberOfFlats > 0 && (
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg p-6 mb-6 text-white">
-            <h2 className="text-xl font-bold mb-4">{t.summary.flatCollectionSummary}</h2>
+            <div className="flex justify-between items-start mb-4">
+              <h2 className="text-xl font-bold">{t.summary.flatCollectionSummary}</h2>
+              <p className="text-xs opacity-75 italic">{t.summary.roundingNote}</p>
+            </div>
 
             {/* Per Flat Section */}
             <div className="mb-6">

@@ -86,6 +86,7 @@ export const bn = {
     flatsPlusGarage: 'ফ্ল্যাট + গ্যারেজ',
     flatsPlusOwner: 'ফ্ল্যাট + মালিক',
     inWords: 'কথায়',
+    roundingNote: '* সকল পরিমাণ পূর্ণ সংখ্যায় রাউন্ড করা হয়েছে',
   },
   actions: {
     loadExample: 'উদাহরণ লোড করুন',
