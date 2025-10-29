@@ -1,7 +1,7 @@
 {
-  "name": "Service Charge Bill Calculator",
-  "short_name": "Service Charge",
-  "description": "Create and manage service charge bills for apartment buildings with ease. Free tool with support for multiple categories, print preview, and PDF download.",
+  "name": "Building Management System",
+  "short_name": "Building Mgmt",
+  "description": "Complete building management solution for apartment complexes. Manage residents, flats, and service charge bills with ease. Free tool with print preview and data export.",
   "start_url": "/service-charge/",
   "scope": "/service-charge/",
   "display": "standalone",

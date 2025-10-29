@@ -40,3 +40,45 @@ export interface BillSummary {
   totalWithBoth: number;
   categoryTotals: Map<string, number>;
 }
+
+// Building Management Types
+export type FlatOwnershipType = 'owned' | 'rented';
+
+export interface Resident {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  nid?: string; // National ID (optional for privacy)
+  moveInDate?: string;
+  notes?: string;
+}
+
+export interface Flat {
+  id: string;
+  flatNumber: string; // Flexible: "1A", "2B", "101", "Ground-1"
+  floorNumber: string; // "1", "2", "G", "Ground", etc.
+  ownershipType: FlatOwnershipType; // Ownership at flat level
+  residents: Resident[];
+  motorcycleParkingCount: number; // 0 if none
+  carParkingCount: number; // 0 if none
+  notes?: string;
+}
+
+export interface Building {
+  id: string;
+  name: string;
+  address: string;
+  totalFloors: number;
+  flats: Flat[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+// localStorage keys
+export const STORAGE_KEYS = {
+  BILL_DATA: 'serviceBillData',
+  BUILDING_DATA: 'buildingData',
+  ACTIVE_VIEW: 'activeView', // 'bills' | 'residents'
+  PREFERRED_LANGUAGE: 'preferred-language' // Existing key
+} as const;

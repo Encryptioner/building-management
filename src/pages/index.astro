@@ -1,5 +1,5 @@
 ---
-import BillCalculator from '../components/BillCalculator';
+import App from '../components/App';
 import { GOOGLE_ANALYTICS_CONFIG } from '../config/googleAnalytics';
 import '../styles/global.css';
 ---
@@ -12,33 +12,33 @@ import '../styles/global.css';
     <meta name="generator" content={Astro.generator} />
 
     <!-- SEO Meta Tags -->
-    <title>Service Charge Bill Calculator - Easy Building Management</title>
+    <title>Building Management System - Service Charges & Residents</title>
     <meta
       name="description"
-      content="Create and manage service charge bills for apartment buildings with ease. Free tool with support for multiple categories, print preview, and PDF download. Available in English and Bangla."
+      content="Complete building management solution for apartment complexes. Manage residents, flats, service charge bills with ease. Free tool with print preview and data export. Available in English and Bangla."
     />
     <meta
       name="keywords"
-      content="service charge calculator, apartment building management, flat service charge, building bill calculator, Bangladesh building management, সার্ভিস চার্জ ক্যালকুলেটর"
+      content="building management, apartment management, resident management, flat management, service charge calculator, building bill calculator, Bangladesh building management, বিল্ডিং ম্যানেজমেন্ট, সার্ভিস চার্জ ক্যালকুলেটর"
     />
     <meta name="author" content="Ankur Mursalin" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://encryptioner.github.io/service-charge/" />
-    <meta property="og:title" content="Service Charge Bill Calculator - Easy Building Management" />
+    <meta property="og:title" content="Building Management System - Service Charges & Residents" />
     <meta
       property="og:description"
-      content="Create and manage service charge bills for apartment buildings with ease. Free tool with support for multiple categories, print preview, and PDF download."
+      content="Complete building management solution for apartment complexes. Manage residents, flats, and service charge bills with ease."
     />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
     <meta property="twitter:url" content="https://encryptioner.github.io/service-charge/" />
-    <meta property="twitter:title" content="Service Charge Bill Calculator" />
+    <meta property="twitter:title" content="Building Management System" />
     <meta
       property="twitter:description"
-      content="Create and manage service charge bills for apartment buildings with ease."
+      content="Complete building management solution for apartment complexes. Manage residents, flats, and service charges."
     />
 
     <!-- Favicon -->
@@ -49,13 +49,13 @@ import '../styles/global.css';
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="Service Charge" />
+    <meta name="apple-mobile-web-app-title" content="Building Management" />
 
     <!-- Theme Color -->
     <meta name="theme-color" content="#2563eb" />
   </head>
   <body>
-    <BillCalculator client:load />
+    <App client:load />
 
     {GOOGLE_ANALYTICS_CONFIG.shouldTrack && (
       <>
