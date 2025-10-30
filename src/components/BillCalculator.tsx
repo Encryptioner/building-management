@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { BillData, ServiceCategory } from '../types';
 import type { SupportedLanguage } from '../locales/config';
 import { isLanguageSupported } from '../locales/config';
@@ -7,6 +7,7 @@ import { saveBillData, loadBillData, clearBillData } from '../utils/storage';
 import { getExampleData } from '../utils/exampleData';
 import { getTranslations, getValidationMessages, getConfirmationMessages, getUIMessages } from '../utils/i18n';
 import { numberToWords } from '../utils/numberToWords';
+import { exportBillData, importBillDataFromFile } from '../utils/dataExport';
 import CategoryForm from './CategoryForm';
 import BillPreview from './BillPreview';
 import BlankFormPreview from './BlankFormPreview';
@@ -66,6 +67,8 @@ export default function BillCalculator() {
     numberOfFlats?: string;
     categories?: { [key: string]: { name?: string; amount?: string } };
   }>({});
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const t = getTranslations(language);
   const validationMsgs = getValidationMessages(language);
@@ -258,6 +261,50 @@ export default function BillCalculator() {
     setShowClearConfirm(false);
   };
 
+  const handleExport = () => {
+    exportBillData(billData);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const result = await importBillDataFromFile(file);
+
+      if (result.success && result.data) {
+        setBillData(result.data);
+        setValidationErrors({});
+        setShowHelp(false);
+        saveBillData(result.data, formMode);
+      } else {
+        alert(
+          language === 'bn'
+            ? `ইমপোর্ট করতে ব্যর্থ: ${result.error}`
+            : `Import failed: ${result.error}`
+        );
+      }
+    } catch (error) {
+      console.error('Failed to import data:', error);
+      alert(
+        language === 'bn'
+          ? 'ফাইল ইমপোর্ট করতে ব্যর্থ। আবার চেষ্টা করুন।'
+          : 'Failed to import file. Please try again.'
+      );
+    } finally {
+      setIsImporting(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const handleGarageChange = (field: keyof typeof billData.garage, value: string | number) => {
     setBillData((prev) => ({
       ...prev,
@@ -315,6 +362,32 @@ export default function BillCalculator() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <span>{uiMsgs.example}</span>
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <button
+                onClick={handleImportClick}
+                disabled={isImporting}
+                className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span>{isImporting ? (language === 'bn' ? 'ইমপোর্ট...' : 'Import...') : (language === 'bn' ? 'ইমপোর্ট' : 'Import')}</span>
+              </button>
+              <button
+                onClick={handleExport}
+                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>{language === 'bn' ? 'এক্সপোর্ট' : 'Export'}</span>
               </button>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
@@ -389,12 +462,34 @@ export default function BillCalculator() {
               <button
                 onClick={loadExample}
                 className="px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2"
+                title={t.actions.loadExample}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 <span className="hidden sm:inline">{t.actions.loadExample}</span>
                 <span className="sm:hidden">{uiMsgs.example}</span>
+              </button>
+              <button
+                onClick={handleImportClick}
+                disabled={isImporting}
+                className="p-2 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                title={language === 'bn' ? 'ইমপোর্ট' : 'Import'}
+              >
+                <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span className="hidden sm:inline">{isImporting ? (language === 'bn' ? 'ইমপোর্ট...' : 'Import...') : (language === 'bn' ? 'ইমপোর্ট' : 'Import')}</span>
+              </button>
+              <button
+                onClick={handleExport}
+                className="p-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2"
+                title={language === 'bn' ? 'এক্সপোর্ট' : 'Export'}
+              >
+                <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span className="hidden sm:inline">{language === 'bn' ? 'এক্সপোর্ট' : 'Export'}</span>
               </button>
               <LanguageSelector currentLanguage={language} onLanguageChange={setLanguage} />
             </div>

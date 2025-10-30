@@ -1,4 +1,6 @@
-import type { Building } from '../types';
+import type { Building, BillData } from '../types';
+
+// ==================== Building Export/Import ====================
 
 /**
  * Export building data as JSON file
@@ -218,6 +220,232 @@ export async function importBuildingDataFromFile(file: File): Promise<{ success:
     return { success: true, data: data as Building };
   } catch (error) {
     console.error('Error importing building data:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error occurred while importing file.'
+    };
+  }
+}
+
+// ==================== Bill Export/Import ====================
+
+/**
+ * Export bill data as JSON file
+ */
+export function exportBillData(billData: BillData): void {
+  const dataStr = JSON.stringify(billData, null, 2);
+  const dataBlob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(dataBlob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  const titleSlug = billData.title.replace(/[^a-z0-9]/gi, '_').substring(0, 50);
+  link.download = `${titleSlug}_bill_data_${new Date().toISOString().split('T')[0]}.json`;
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+/**
+ * Validate imported bill data structure
+ */
+export function validateBillData(data: any): { valid: boolean; error?: string } {
+  // Check if data exists
+  if (!data) {
+    return { valid: false, error: 'No data provided' };
+  }
+
+  // Check required fields
+  const requiredFields = ['title', 'numberOfFlats', 'garage', 'paymentInfo', 'notes', 'categories'];
+  for (const field of requiredFields) {
+    if (!(field in data)) {
+      return { valid: false, error: `Missing required field: ${field}` };
+    }
+  }
+
+  // Validate title
+  if (typeof data.title !== 'string' || data.title.trim() === '') {
+    return { valid: false, error: 'Invalid title: must be a non-empty string' };
+  }
+
+  // Validate numberOfFlats
+  if (typeof data.numberOfFlats !== 'number' || data.numberOfFlats <= 0) {
+    return { valid: false, error: 'Invalid numberOfFlats: must be a positive number' };
+  }
+
+  // Validate garage
+  if (!data.garage || typeof data.garage !== 'object') {
+    return { valid: false, error: 'Invalid garage: must be an object' };
+  }
+
+  const garageValidation = validateGarageSpace(data.garage);
+  if (!garageValidation.valid) {
+    return garageValidation;
+  }
+
+  // Validate paymentInfo
+  if (typeof data.paymentInfo !== 'string') {
+    return { valid: false, error: 'Invalid paymentInfo: must be a string' };
+  }
+
+  // Validate notes
+  if (typeof data.notes !== 'string') {
+    return { valid: false, error: 'Invalid notes: must be a string' };
+  }
+
+  // Validate categories
+  if (!Array.isArray(data.categories)) {
+    return { valid: false, error: 'Invalid categories: must be an array' };
+  }
+
+  // Validate each category
+  for (let i = 0; i < data.categories.length; i++) {
+    const category = data.categories[i];
+    const categoryValidation = validateServiceCategory(category, i);
+    if (!categoryValidation.valid) {
+      return categoryValidation;
+    }
+  }
+
+  // Optional fields validation
+  if ('showMotorcycleInBlankForm' in data && typeof data.showMotorcycleInBlankForm !== 'boolean') {
+    return { valid: false, error: 'Invalid showMotorcycleInBlankForm: must be a boolean' };
+  }
+
+  if ('showCarInBlankForm' in data && typeof data.showCarInBlankForm !== 'boolean') {
+    return { valid: false, error: 'Invalid showCarInBlankForm: must be a boolean' };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Validate garage space object
+ */
+function validateGarageSpace(garage: any): { valid: boolean; error?: string } {
+  const requiredFields = [
+    'motorcycleSpaces',
+    'motorcycleSpaceAmount',
+    'motorcycleSpaceNotes',
+    'carSpaces',
+    'carSpaceAmount',
+    'carSpaceNotes'
+  ];
+
+  for (const field of requiredFields) {
+    if (!(field in garage)) {
+      return { valid: false, error: `Garage: Missing required field: ${field}` };
+    }
+  }
+
+  if (typeof garage.motorcycleSpaces !== 'number' || garage.motorcycleSpaces < 0) {
+    return { valid: false, error: 'Garage: Invalid motorcycleSpaces (must be a non-negative number)' };
+  }
+
+  if (typeof garage.motorcycleSpaceAmount !== 'number' || garage.motorcycleSpaceAmount < 0) {
+    return { valid: false, error: 'Garage: Invalid motorcycleSpaceAmount (must be a non-negative number)' };
+  }
+
+  if (typeof garage.motorcycleSpaceNotes !== 'string') {
+    return { valid: false, error: 'Garage: Invalid motorcycleSpaceNotes (must be a string)' };
+  }
+
+  if (typeof garage.carSpaces !== 'number' || garage.carSpaces < 0) {
+    return { valid: false, error: 'Garage: Invalid carSpaces (must be a non-negative number)' };
+  }
+
+  if (typeof garage.carSpaceAmount !== 'number' || garage.carSpaceAmount < 0) {
+    return { valid: false, error: 'Garage: Invalid carSpaceAmount (must be a non-negative number)' };
+  }
+
+  if (typeof garage.carSpaceNotes !== 'string') {
+    return { valid: false, error: 'Garage: Invalid carSpaceNotes (must be a string)' };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Validate a single service category
+ */
+function validateServiceCategory(category: any, index: number): { valid: boolean; error?: string } {
+  const requiredFields = ['id', 'name', 'duration', 'info', 'billType', 'amount'];
+
+  for (const field of requiredFields) {
+    if (!(field in category)) {
+      return { valid: false, error: `Category ${index}: Missing required field: ${field}` };
+    }
+  }
+
+  if (typeof category.id !== 'string' || category.id.trim() === '') {
+    return { valid: false, error: `Category ${index}: Invalid id` };
+  }
+
+  if (typeof category.name !== 'string' || category.name.trim() === '') {
+    return { valid: false, error: `Category ${index}: Invalid name` };
+  }
+
+  if (typeof category.duration !== 'string') {
+    return { valid: false, error: `Category ${index}: Invalid duration (must be a string)` };
+  }
+
+  if (typeof category.info !== 'string') {
+    return { valid: false, error: `Category ${index}: Invalid info (must be a string)` };
+  }
+
+  if (category.billType !== 'single-flat' && category.billType !== 'all-building') {
+    return { valid: false, error: `Category ${index}: Invalid billType (must be "single-flat" or "all-building")` };
+  }
+
+  if (typeof category.amount !== 'number' || category.amount < 0) {
+    return { valid: false, error: `Category ${index}: Invalid amount (must be a non-negative number)` };
+  }
+
+  // Optional isOwnerOnly field
+  if ('isOwnerOnly' in category && typeof category.isOwnerOnly !== 'boolean') {
+    return { valid: false, error: `Category ${index}: Invalid isOwnerOnly (must be a boolean)` };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Parse and validate imported bill JSON file
+ */
+export async function importBillDataFromFile(file: File): Promise<{ success: boolean; data?: BillData; error?: string }> {
+  try {
+    // Check file type
+    if (!file.name.endsWith('.json')) {
+      return { success: false, error: 'Invalid file type. Please upload a JSON file.' };
+    }
+
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      return { success: false, error: 'File too large. Maximum size is 10MB.' };
+    }
+
+    // Read file content
+    const text = await file.text();
+
+    // Parse JSON
+    let data: any;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      return { success: false, error: 'Invalid JSON format. Please check your file.' };
+    }
+
+    // Validate structure
+    const validation = validateBillData(data);
+    if (!validation.valid) {
+      return { success: false, error: validation.error };
+    }
+
+    return { success: true, data: data as BillData };
+  } catch (error) {
+    console.error('Error importing bill data:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred while importing file.'
