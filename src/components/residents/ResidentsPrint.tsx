@@ -39,11 +39,12 @@ export default function ResidentsPrint({
         return;
       }
 
-      // Inject CSS to override OKLCH colors with hex equivalents before PDF generation
+      // Inject CSS to override OKLCH colors with hex equivalents ONLY for PDF generation
+      // Use a unique class to scope only to the offscreen element
       const styleOverride = document.createElement('style');
       styleOverride.id = 'pdf-color-override';
       styleOverride.textContent = `
-        :root, :host, * {
+        #pdf-render-target {
           --color-blue-50: #eff6ff !important;
           --color-blue-100: #dbeafe !important;
           --color-blue-200: #bfdbfe !important;
@@ -73,37 +74,37 @@ export default function ResidentsPrint({
           --color-white: #ffffff !important;
         }
 
-        /* Force specific background colors */
-        .bg-blue-50 { background-color: #eff6ff !important; }
-        .bg-blue-100 { background-color: #dbeafe !important; }
-        .bg-green-50 { background-color: #f0fdf4 !important; }
-        .bg-green-100 { background-color: #dcfce7 !important; }
-        .bg-orange-50 { background-color: #fff7ed !important; }
-        .bg-orange-100 { background-color: #ffedd5 !important; }
-        .bg-gray-50 { background-color: #f9fafb !important; }
-        .bg-gray-100 { background-color: #f3f4f6 !important; }
-        .bg-gray-200 { background-color: #e5e7eb !important; }
+        #pdf-render-target .bg-blue-50 { background-color: #eff6ff !important; }
+        #pdf-render-target .bg-blue-100 { background-color: #dbeafe !important; }
+        #pdf-render-target .bg-green-50 { background-color: #f0fdf4 !important; }
+        #pdf-render-target .bg-green-100 { background-color: #dcfce7 !important; }
+        #pdf-render-target .bg-orange-50 { background-color: #fff7ed !important; }
+        #pdf-render-target .bg-orange-100 { background-color: #ffedd5 !important; }
+        #pdf-render-target .bg-gray-50 { background-color: #f9fafb !important; }
+        #pdf-render-target .bg-gray-100 { background-color: #f3f4f6 !important; }
+        #pdf-render-target .bg-gray-200 { background-color: #e5e7eb !important; }
 
-        /* Border colors */
-        .border-blue-200 { border-color: #bfdbfe !important; }
-        .border-green-200 { border-color: #bbf7d0 !important; }
-        .border-orange-200 { border-color: #fed7aa !important; }
-        .border-gray-200 { border-color: #e5e7eb !important; }
-        .border-gray-300 { border-color: #d1d5db !important; }
+        #pdf-render-target .border-blue-200 { border-color: #bfdbfe !important; }
+        #pdf-render-target .border-green-200 { border-color: #bbf7d0 !important; }
+        #pdf-render-target .border-orange-200 { border-color: #fed7aa !important; }
+        #pdf-render-target .border-gray-200 { border-color: #e5e7eb !important; }
+        #pdf-render-target .border-gray-300 { border-color: #d1d5db !important; }
 
-        /* Text colors */
-        .text-blue-600 { color: #2563eb !important; }
-        .text-blue-700 { color: #1d4ed8 !important; }
-        .text-green-600 { color: #16a34a !important; }
-        .text-green-700 { color: #15803d !important; }
-        .text-orange-600 { color: #ea580c !important; }
-        .text-orange-700 { color: #c2410c !important; }
-        .text-gray-500 { color: #6b7280 !important; }
-        .text-gray-600 { color: #4b5563 !important; }
-        .text-gray-700 { color: #374151 !important; }
-        .text-gray-800 { color: #1f2937 !important; }
-        .text-gray-900 { color: #111827 !important; }
+        #pdf-render-target .text-blue-600 { color: #2563eb !important; }
+        #pdf-render-target .text-blue-700 { color: #1d4ed8 !important; }
+        #pdf-render-target .text-green-600 { color: #16a34a !important; }
+        #pdf-render-target .text-green-700 { color: #15803d !important; }
+        #pdf-render-target .text-orange-600 { color: #ea580c !important; }
+        #pdf-render-target .text-orange-700 { color: #c2410c !important; }
+        #pdf-render-target .text-gray-500 { color: #6b7280 !important; }
+        #pdf-render-target .text-gray-600 { color: #4b5563 !important; }
+        #pdf-render-target .text-gray-700 { color: #374151 !important; }
+        #pdf-render-target .text-gray-800 { color: #1f2937 !important; }
+        #pdf-render-target .text-gray-900 { color: #111827 !important; }
       `;
+
+      // Add ID to offscreen element temporarily
+      offscreenRef.current.id = 'pdf-render-target';
       document.head.appendChild(styleOverride);
 
       // Wait for styles to apply
@@ -119,10 +120,13 @@ export default function ResidentsPrint({
       // Use jsPDF's html method for better pagination that respects element boundaries
       await pdf.html(offscreenRef.current, {
         callback: function (pdf) {
-          // Remove the style override
+          // Remove the style override and ID
           const styleEl = document.getElementById('pdf-color-override');
           if (styleEl) {
             document.head.removeChild(styleEl);
+          }
+          if (offscreenRef.current) {
+            offscreenRef.current.id = '';
           }
 
           const sanitizedName = building.name
@@ -139,22 +143,25 @@ export default function ResidentsPrint({
         x: 10,
         y: 10,
         html2canvas: {
-          scale: 0.75, // Lower scale for better page fitting
+          scale: 0.75,
           logging: false,
           useCORS: true,
           allowTaint: true,
         },
-        autoPaging: 'text', // Automatically paginate while respecting text boundaries
-        margin: [10, 10, 10, 10], // Top, Right, Bottom, Left margins in mm
-        width: 190, // Content width (210 - 20 for margins)
+        autoPaging: 'text',
+        margin: [10, 10, 10, 10],
+        width: 190,
       });
     } catch (error) {
       console.error('Failed to generate PDF:', error);
 
-      // Clean up style override if error occurs
+      // Clean up style override and ID if error occurs
       const styleEl = document.getElementById('pdf-color-override');
       if (styleEl) {
         document.head.removeChild(styleEl);
+      }
+      if (offscreenRef.current) {
+        offscreenRef.current.id = '';
       }
 
       setIsGeneratingPDF(false);
