@@ -1,6 +1,6 @@
-# 🏢 Service Charge Bill Calculator
+# 🏢 Building Management
 
-A modern, sleek web application for creating and managing service charge bills for apartment buildings. Built with Astro, React, TypeScript, and Tailwind CSS.
+A modern, sleek web application for managing apartment buildings, including creating and managing service charge bills. Built with Astro, React, TypeScript, and Tailwind CSS.
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D22-green.svg)

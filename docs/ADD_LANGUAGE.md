@@ -1,6 +1,6 @@
 # Adding a New Language - Step-by-Step Guide
 
-This guide will walk you through adding a new language to the Service Charge Bill Calculator.
+This guide will walk you through adding a new language to the Building Management.
 
 ## 📋 Prerequisites
 

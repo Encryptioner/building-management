@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Service Charge Bill Calculator - A PWA for creating and managing service charge bills for apartment buildings. Users can add unlimited categories, choose billing types (single flat or divided among all flats), preview bills, and export to PDF. All data is stored in browser local storage for privacy.
+Building Management - A PWA for managing apartment buildings, including creating and managing service charge bills. Users can add unlimited categories, choose billing types (single flat or divided among all flats), preview bills, and export to PDF. All data is stored in browser local storage for privacy.
 
 ## Commands
 

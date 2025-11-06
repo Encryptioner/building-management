@@ -1,6 +1,6 @@
 # PWA Icon Generation Guide
 
-To generate PWA icons for the Service Charge Bill Calculator:
+To generate PWA icons for the Building Management:
 
 ## Option 1: Using Online Tools (Recommended)
 
