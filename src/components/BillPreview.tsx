@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import type { BillData, BillSummary } from '../types';
@@ -24,6 +24,9 @@ export default function BillPreview({
   const uiMsgs = getUIMessages(language);
   const printRef = useRef<HTMLDivElement>(null);
   const offscreenRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const currentDate = new Date().toLocaleString(getLocaleCode(language), {
     year: 'numeric',
     month: 'long',
@@ -140,59 +143,128 @@ export default function BillPreview({
 
   const handleDownloadImage = async () => {
     try {
+      setIsGeneratingImage(true);
+
+      // Small delay to allow UI to update with loading state
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const canvas = await generateCanvas();
-      if (!canvas) return;
+      if (!canvas) {
+        setIsGeneratingImage(false);
+        return;
+      }
 
       // Convert canvas to blob and download as JPEG
       canvas.toBlob((blob) => {
-        if (!blob) return;
+        if (!blob) {
+          setIsGeneratingImage(false);
+          return;
+        }
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
         link.download = getSanitizedFileName('jpg');
         link.click();
         URL.revokeObjectURL(url);
+        setIsGeneratingImage(false);
       }, 'image/jpeg', 0.9); // 90% quality for image download
     } catch (error) {
       console.error('Error generating image:', error);
+      setIsGeneratingImage(false);
       alert(uiMsgs.imageGenerationError);
     }
   };
 
   const handleDownloadPDF = async () => {
     try {
-      const canvas = await generateCanvas();
-      if (!canvas) return;
+      setIsGeneratingPDF(true);
 
-      // Use JPEG format with compression instead of PNG
-      const imgData = canvas.toDataURL('image/jpeg', 0.85); // 85% quality for good balance
+      // Small delay to allow UI to update with loading state
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      const canvas = await generateCanvas();
+      if (!canvas) {
+        setIsGeneratingPDF(false);
+        return;
+      }
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
-        compress: true, // Enable PDF compression
+        compress: true,
       });
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      const imgY = 0;
 
-      pdf.addImage(
-        imgData,
-        'JPEG',
-        imgX,
-        imgY,
-        imgWidth * ratio,
-        imgHeight * ratio
-      );
+      // A4 dimensions (in mm) with margins
+      const marginTop = 10;
+      const marginBottom = 10;
+      const usableHeight = pdfHeight - marginTop - marginBottom;
+
+      // Convert to pixels (96 DPI: 1mm = 3.7795px)
+      const pageHeightPx = usableHeight * 3.7795;
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+
+      // Calculate how many pages we need
+      let heightLeft = canvasHeight;
+      let position = 0;
+      let pageNumber = 0;
+
+      while (heightLeft > 0) {
+        if (pageNumber > 0) {
+          pdf.addPage();
+        }
+
+        // Create a temporary canvas for this page
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = canvasWidth;
+        pageCanvas.height = Math.min(pageHeightPx, heightLeft);
+
+        const ctx = pageCanvas.getContext('2d');
+        if (!ctx) break;
+
+        // Fill with white background
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+
+        // Draw the portion of the full canvas that fits on this page
+        ctx.drawImage(
+          canvas,
+          0, position,           // Source x, y
+          canvasWidth, pageCanvas.height, // Source width, height
+          0, 0,                  // Dest x, y
+          canvasWidth, pageCanvas.height  // Dest width, height
+        );
+
+        // Use JPEG for better file size
+        const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.85);
+
+        // Calculate dimensions to fit the page width
+        const imgWidth = pdfWidth;
+        const imgHeight = (pageCanvas.height * pdfWidth) / canvasWidth;
+
+        pdf.addImage(
+          pageImgData,
+          'JPEG',
+          0,
+          marginTop,
+          imgWidth,
+          imgHeight
+        );
+
+        heightLeft -= pageHeightPx;
+        position += pageHeightPx;
+        pageNumber++;
+      }
 
       pdf.save(getSanitizedFileName('pdf'));
+      setIsGeneratingPDF(false);
     } catch (error) {
       console.error('Error generating PDF:', error);
+      setIsGeneratingPDF(false);
       alert(uiMsgs.pdfGenerationError);
     }
   };
@@ -205,8 +277,16 @@ export default function BillPreview({
         return;
       }
 
+      setIsSharing(true);
+
+      // Small delay to allow UI to update with loading state
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const canvas = await generateCanvas();
-      if (!canvas) return;
+      if (!canvas) {
+        setIsSharing(false);
+        return;
+      }
 
       // Convert canvas to blob
       const blob = await new Promise<Blob | null>((resolve) => {
@@ -214,6 +294,7 @@ export default function BillPreview({
       });
 
       if (!blob) {
+        setIsSharing(false);
         alert(uiMsgs.imageGenerationError);
         return;
       }
@@ -224,6 +305,7 @@ export default function BillPreview({
 
       // Check if files can be shared
       if (navigator.canShare && !navigator.canShare({ files: [file] })) {
+        setIsSharing(false);
         alert(uiMsgs.shareNotSupported || 'Sharing files is not supported on this device');
         return;
       }
@@ -234,7 +316,9 @@ export default function BillPreview({
         text: t.preview.shareText || 'Service Charge Bill',
         files: [file],
       });
+      setIsSharing(false);
     } catch (error) {
+      setIsSharing(false);
       // User cancelled the share or other error occurred
       if ((error as Error).name !== 'AbortError') {
         console.error('Error sharing:', error);
@@ -706,52 +790,92 @@ export default function BillPreview({
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={handleShare}
-              className="px-3 py-2 text-sm md:px-4 md:text-base bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2"
+              disabled={isSharing || isGeneratingPDF || isGeneratingImage}
+              className="px-3 py-2 text-sm md:px-4 md:text-base bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-                />
-              </svg>
-              <span className="hidden sm:inline">{t.actions.share}</span>
-              <span className="sm:hidden">{t.actions.share}</span>
+              {isSharing ? (
+                <>
+                  <svg className="w-4 h-4 md:w-5 md:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="hidden sm:inline">{t.pdf?.downloading || 'Sharing...'}</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">{t.actions.share}</span>
+                  <span className="sm:hidden">{t.actions.share}</span>
+                </>
+              )}
             </button>
             <button
               onClick={handleDownloadPDF}
-              className="px-3 py-2 text-sm md:px-4 md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+              disabled={isGeneratingPDF || isGeneratingImage || isSharing}
+              className="px-3 py-2 text-sm md:px-4 md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <span className="hidden sm:inline">{t.actions.download}</span>
-              <span className="sm:hidden">PDF</span>
+              {isGeneratingPDF ? (
+                <>
+                  <svg className="w-4 h-4 md:w-5 md:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="hidden sm:inline">{t.pdf?.downloading || 'Generating...'}</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">{t.actions.download}</span>
+                  <span className="sm:hidden">PDF</span>
+                </>
+              )}
             </button>
             <button
               onClick={handleDownloadImage}
-              className="px-3 py-2 text-sm md:px-4 md:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+              disabled={isGeneratingImage || isGeneratingPDF || isSharing}
+              className="px-3 py-2 text-sm md:px-4 md:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
-              <span className="hidden sm:inline">{t.actions.downloadImage}</span>
-              <span className="sm:hidden">IMG</span>
+              {isGeneratingImage ? (
+                <>
+                  <svg className="w-4 h-4 md:w-5 md:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="hidden sm:inline">{t.pdf?.downloading || 'Generating...'}</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">{t.actions.downloadImage}</span>
+                  <span className="sm:hidden">IMG</span>
+                </>
+              )}
             </button>
             <button
               onClick={onClose}
-              className="px-3 py-2 text-sm md:px-4 md:text-base bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+              disabled={isGeneratingPDF || isGeneratingImage || isSharing}
+              className="px-3 py-2 text-sm md:px-4 md:text-base bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {t.preview.close}
             </button>
