@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import type { Building, Flat } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
 import { getTranslations, getLocaleCode } from '../../utils/i18n';
@@ -28,97 +27,6 @@ export default function ResidentsPrint({
     minute: '2-digit',
   });
 
-  const generateCanvas = async () => {
-    if (!offscreenRef.current) return null;
-
-    // Inject CSS to override OKLCH color variables with hex equivalents
-    const styleOverride = document.createElement('style');
-    styleOverride.id = 'pdf-color-override';
-    styleOverride.textContent = `
-      :root, :host, * {
-        --color-blue-50: #eff6ff !important;
-        --color-blue-100: #dbeafe !important;
-        --color-blue-200: #bfdbfe !important;
-        --color-blue-600: #2563eb !important;
-        --color-blue-700: #1d4ed8 !important;
-        --color-green-50: #f0fdf4 !important;
-        --color-green-100: #dcfce7 !important;
-        --color-green-200: #bbf7d0 !important;
-        --color-green-600: #16a34a !important;
-        --color-green-700: #15803d !important;
-        --color-orange-50: #fff7ed !important;
-        --color-orange-100: #ffedd5 !important;
-        --color-orange-200: #fed7aa !important;
-        --color-orange-600: #ea580c !important;
-        --color-orange-700: #c2410c !important;
-        --color-gray-50: #f9fafb !important;
-        --color-gray-100: #f3f4f6 !important;
-        --color-gray-200: #e5e7eb !important;
-        --color-gray-300: #d1d5db !important;
-        --color-gray-400: #9ca3af !important;
-        --color-gray-500: #6b7280 !important;
-        --color-gray-600: #4b5563 !important;
-        --color-gray-700: #374151 !important;
-        --color-gray-800: #1f2937 !important;
-        --color-gray-900: #111827 !important;
-        --color-black: #000000 !important;
-        --color-white: #ffffff !important;
-      }
-
-      /* Force specific background colors for print */
-      .bg-blue-50 { background-color: #eff6ff !important; }
-      .bg-blue-100 { background-color: #dbeafe !important; }
-      .bg-green-50 { background-color: #f0fdf4 !important; }
-      .bg-green-100 { background-color: #dcfce7 !important; }
-      .bg-orange-50 { background-color: #fff7ed !important; }
-      .bg-orange-100 { background-color: #ffedd5 !important; }
-      .bg-gray-50 { background-color: #f9fafb !important; }
-      .bg-gray-100 { background-color: #f3f4f6 !important; }
-      .bg-gray-200 { background-color: #e5e7eb !important; }
-
-      /* Border colors */
-      .border-blue-200 { border-color: #bfdbfe !important; }
-      .border-green-200 { border-color: #bbf7d0 !important; }
-      .border-orange-200 { border-color: #fed7aa !important; }
-      .border-gray-200 { border-color: #e5e7eb !important; }
-      .border-gray-300 { border-color: #d1d5db !important; }
-
-      /* Text colors */
-      .text-blue-600 { color: #2563eb !important; }
-      .text-blue-700 { color: #1d4ed8 !important; }
-      .text-green-600 { color: #16a34a !important; }
-      .text-green-700 { color: #15803d !important; }
-      .text-orange-600 { color: #ea580c !important; }
-      .text-orange-700 { color: #c2410c !important; }
-      .text-gray-500 { color: #6b7280 !important; }
-      .text-gray-600 { color: #4b5563 !important; }
-      .text-gray-700 { color: #374151 !important; }
-      .text-gray-800 { color: #1f2937 !important; }
-      .text-gray-900 { color: #111827 !important; }
-    `;
-    document.head.appendChild(styleOverride);
-
-    // Wait a tick for styles to apply
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    const canvas = await html2canvas(offscreenRef.current, {
-      scale: 1.2, // Reduced from 2 to 1.2 for smaller file size while maintaining quality
-      logging: false,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      removeContainer: false,
-      imageTimeout: 0,
-      width: 794, // A4 width in pixels at 96 DPI (210mm)
-      windowWidth: 794,
-    });
-
-    // Remove the style override
-    document.head.removeChild(styleOverride);
-
-    return canvas;
-  };
-
   const handleDownloadPDF = async () => {
     try {
       setIsGeneratingPDF(true);
@@ -126,8 +34,7 @@ export default function ResidentsPrint({
       // Small delay to allow UI to update with loading state
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      const canvas = await generateCanvas();
-      if (!canvas) {
+      if (!offscreenRef.current) {
         setIsGeneratingPDF(false);
         return;
       }
@@ -136,85 +43,35 @@ export default function ResidentsPrint({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
-        compress: true, // Enable PDF compression for smaller file size
+        compress: true,
       });
 
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-
-      // A4 dimensions (in mm) with margins
-      const marginTop = 10;
-      const marginBottom = 10;
-      const usableHeight = pdfHeight - marginTop - marginBottom;
-
-      // Convert to pixels (96 DPI: 1mm = 3.7795px)
-      const pageHeightPx = usableHeight * 3.7795;
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
-
-      // Calculate how many pages we need
-      let heightLeft = canvasHeight;
-      let position = 0;
-      let pageNumber = 0;
-
-      while (heightLeft > 0) {
-        if (pageNumber > 0) {
-          pdf.addPage();
-        }
-
-        // Create a temporary canvas for this page
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width = canvasWidth;
-        pageCanvas.height = Math.min(pageHeightPx, heightLeft);
-
-        const ctx = pageCanvas.getContext('2d');
-        if (!ctx) break;
-
-        // Fill with white background
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-
-        // Draw the portion of the full canvas that fits on this page
-        ctx.drawImage(
-          canvas,
-          0, position,           // Source x, y
-          canvasWidth, pageCanvas.height, // Source width, height
-          0, 0,                  // Dest x, y
-          canvasWidth, pageCanvas.height  // Dest width, height
-        );
-
-        // Use JPEG with compression for much smaller file size
-        const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.75);
-
-        // Calculate dimensions to fit the page width with margins
-        const imgWidth = pdfWidth;
-        const imgHeight = (pageCanvas.height * pdfWidth) / canvasWidth;
-
-        pdf.addImage(
-          pageImgData,
-          'JPEG',
-          0,
-          marginTop,
-          imgWidth,
-          imgHeight
-        );
-
-        heightLeft -= pageHeightPx;
-        position += pageHeightPx;
-        pageNumber++;
-      }
-
-      const sanitizedName = building.name
-        .trim()
-        .replace(/[^\w\s\u0980-\u09FF-]/g, ' ') // Replace special chars with space
-        .replace(/\s+/g, '_') // Replace multiple spaces with single underscore
-        .replace(/^_+|_+$/g, ''); // Remove leading/trailing underscores
-      const fileName = `${sanitizedName}_residents_${
-        new Date().toISOString().split('T')[0]
-      }.pdf`;
-      pdf.save(fileName);
-
-      setIsGeneratingPDF(false);
+      // Use jsPDF's html method for better pagination that respects element boundaries
+      await pdf.html(offscreenRef.current, {
+        callback: function (pdf) {
+          const sanitizedName = building.name
+            .trim()
+            .replace(/[^\w\s\u0980-\u09FF-]/g, ' ')
+            .replace(/\s+/g, '_')
+            .replace(/^_+|_+$/g, '');
+          const fileName = `${sanitizedName}_residents_${
+            new Date().toISOString().split('T')[0]
+          }.pdf`;
+          pdf.save(fileName);
+          setIsGeneratingPDF(false);
+        },
+        x: 10,
+        y: 10,
+        html2canvas: {
+          scale: 0.75, // Lower scale for better page fitting
+          logging: false,
+          useCORS: true,
+          allowTaint: true,
+        },
+        autoPaging: 'text', // Automatically paginate while respecting text boundaries
+        margin: [10, 10, 10, 10], // Top, Right, Bottom, Left margins in mm
+        width: 190, // Content width (210 - 20 for margins)
+      });
     } catch (error) {
       console.error('Failed to generate PDF:', error);
       setIsGeneratingPDF(false);
@@ -249,9 +106,9 @@ export default function ResidentsPrint({
 
   // Separate component for PDF rendering with fixed styling (no responsive classes)
   const PDFContent = () => (
-    <div className="bg-white p-6 max-w-4xl mx-auto" style={{ width: '794px' }}>
+    <div className="bg-white p-6 max-w-4xl mx-auto" style={{ width: '794px', pageBreakAfter: 'auto' }}>
       {/* Header */}
-      <div className="text-center mb-4 pb-3 border-b-2 border-gray-300">
+      <div className="text-center mb-4 pb-3 border-b-2 border-gray-300" style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid' }}>
         <h1 className="text-2xl font-bold text-gray-900 mb-1">
           {t.building.residentList}
         </h1>
@@ -263,7 +120,7 @@ export default function ResidentsPrint({
       </div>
 
       {/* Statistics Summary */}
-      <div className="grid grid-cols-2 gap-3 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <div className="grid grid-cols-2 gap-3 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg" style={{ pageBreakInside: 'avoid', pageBreakAfter: 'avoid' }}>
         <div>
           <p className="text-sm text-gray-600">{t.stats.totalFlats}</p>
           <p className="text-2xl font-bold text-blue-600">{totalFlats}</p>
@@ -298,9 +155,9 @@ export default function ResidentsPrint({
           : `${t.flat.floor} ${floor}`;
 
         return (
-          <div key={floor} className="mb-3">
+          <div key={floor} className="mb-3" style={{ pageBreakBefore: 'auto', pageBreakInside: 'avoid' }}>
             {/* Floor Header */}
-            <div className="bg-gray-100 px-3 py-1 rounded-t-lg border-b-2 border-gray-300">
+            <div className="bg-gray-100 px-3 py-1 rounded-t-lg border-b-2 border-gray-300" style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid' }}>
               <h3 className="text-base font-bold text-gray-900">{floorLabel}</h3>
               <p className="text-xs text-gray-600">
                 {flats.length} {flats.length === 1 ? t.pdf.flat : t.pdf.flats}
@@ -315,6 +172,7 @@ export default function ResidentsPrint({
                   className={`p-2 ${idx > 0 ? 'border-t border-gray-200' : ''} ${
                     flat.residents.length === 0 ? 'bg-gray-50' : ''
                   }`}
+                  style={{ pageBreakInside: 'avoid' }}
                 >
                   {/* Flat Header */}
                   <div className="flex items-start justify-between mb-1">
@@ -352,7 +210,7 @@ export default function ResidentsPrint({
                   ) : (
                     <div className="space-y-1">
                       {flat.residents.map((resident) => (
-                        <div key={resident.id} className="bg-gray-50 p-2 rounded border border-gray-200">
+                        <div key={resident.id} className="bg-gray-50 p-2 rounded border border-gray-200" style={{ pageBreakInside: 'avoid' }}>
                           <p className="font-semibold text-sm text-gray-900">{resident.name}</p>
                           <div className="grid grid-cols-2 gap-1 mt-0.5 text-xs text-gray-600">
                             {resident.phone && (
@@ -402,7 +260,7 @@ export default function ResidentsPrint({
       })}
 
       {/* Footer */}
-      <div className="mt-4 pt-2 border-t border-gray-300 text-center text-xs text-gray-500">
+      <div className="mt-4 pt-2 border-t border-gray-300 text-center text-xs text-gray-500" style={{ pageBreakBefore: 'auto', pageBreakInside: 'avoid' }}>
         <p>
           {t.pdf.generatedBy}{' '}
           <a href={window.location.href} className="text-blue-600 underline">
