@@ -191,12 +191,12 @@ export default function ResidentsPrint({
                     <div className="text-right text-xs text-gray-600">
                       {flat.motorcycleParkingCount > 0 && (
                         <span className="mr-3">
-                          🏍️ {flat.motorcycleParkingCount}
+                          M: {flat.motorcycleParkingCount}
                         </span>
                       )}
                       {flat.carParkingCount > 0 && (
                         <span>
-                          🚗 {flat.carParkingCount}
+                          C: {flat.carParkingCount}
                         </span>
                       )}
                     </div>
@@ -357,12 +357,12 @@ export default function ResidentsPrint({
                     <div className="text-right text-xs sm:text-sm text-gray-600 flex-shrink-0">
                       {flat.motorcycleParkingCount > 0 && (
                         <span className="mr-2 sm:mr-3 whitespace-nowrap">
-                          🏍️ {flat.motorcycleParkingCount}
+                          M: {flat.motorcycleParkingCount}
                         </span>
                       )}
                       {flat.carParkingCount > 0 && (
                         <span className="whitespace-nowrap">
-                          🚗 {flat.carParkingCount}
+                          C: {flat.carParkingCount}
                         </span>
                       )}
                     </div>
