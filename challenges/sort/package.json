@@ -1,0 +1,29 @@
+{
+  "name": "ccwc-sort",
+  "version": "1.0.0",
+  "description": "Unix sort command implementation - Coding Challenges",
+  "main": "dist/sort.js",
+  "type": "module",
+  "bin": {
+    "ccwc-sort": "./dist/sort.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/sort.js",
+    "dev": "tsx src/sort.ts",
+    "test": "node --test tests/*.test.js"
+  },
+  "keywords": [
+    "sort",
+    "unix",
+    "cli",
+    "coding-challenge"
+  ],
+  "author": "Ankur Mursalin",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.9.3"
+  }
+}
