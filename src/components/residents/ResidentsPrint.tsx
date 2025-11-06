@@ -39,6 +39,76 @@ export default function ResidentsPrint({
         return;
       }
 
+      // Inject CSS to override OKLCH colors with hex equivalents before PDF generation
+      const styleOverride = document.createElement('style');
+      styleOverride.id = 'pdf-color-override';
+      styleOverride.textContent = `
+        :root, :host, * {
+          --color-blue-50: #eff6ff !important;
+          --color-blue-100: #dbeafe !important;
+          --color-blue-200: #bfdbfe !important;
+          --color-blue-600: #2563eb !important;
+          --color-blue-700: #1d4ed8 !important;
+          --color-green-50: #f0fdf4 !important;
+          --color-green-100: #dcfce7 !important;
+          --color-green-200: #bbf7d0 !important;
+          --color-green-600: #16a34a !important;
+          --color-green-700: #15803d !important;
+          --color-orange-50: #fff7ed !important;
+          --color-orange-100: #ffedd5 !important;
+          --color-orange-200: #fed7aa !important;
+          --color-orange-600: #ea580c !important;
+          --color-orange-700: #c2410c !important;
+          --color-gray-50: #f9fafb !important;
+          --color-gray-100: #f3f4f6 !important;
+          --color-gray-200: #e5e7eb !important;
+          --color-gray-300: #d1d5db !important;
+          --color-gray-400: #9ca3af !important;
+          --color-gray-500: #6b7280 !important;
+          --color-gray-600: #4b5563 !important;
+          --color-gray-700: #374151 !important;
+          --color-gray-800: #1f2937 !important;
+          --color-gray-900: #111827 !important;
+          --color-black: #000000 !important;
+          --color-white: #ffffff !important;
+        }
+
+        /* Force specific background colors */
+        .bg-blue-50 { background-color: #eff6ff !important; }
+        .bg-blue-100 { background-color: #dbeafe !important; }
+        .bg-green-50 { background-color: #f0fdf4 !important; }
+        .bg-green-100 { background-color: #dcfce7 !important; }
+        .bg-orange-50 { background-color: #fff7ed !important; }
+        .bg-orange-100 { background-color: #ffedd5 !important; }
+        .bg-gray-50 { background-color: #f9fafb !important; }
+        .bg-gray-100 { background-color: #f3f4f6 !important; }
+        .bg-gray-200 { background-color: #e5e7eb !important; }
+
+        /* Border colors */
+        .border-blue-200 { border-color: #bfdbfe !important; }
+        .border-green-200 { border-color: #bbf7d0 !important; }
+        .border-orange-200 { border-color: #fed7aa !important; }
+        .border-gray-200 { border-color: #e5e7eb !important; }
+        .border-gray-300 { border-color: #d1d5db !important; }
+
+        /* Text colors */
+        .text-blue-600 { color: #2563eb !important; }
+        .text-blue-700 { color: #1d4ed8 !important; }
+        .text-green-600 { color: #16a34a !important; }
+        .text-green-700 { color: #15803d !important; }
+        .text-orange-600 { color: #ea580c !important; }
+        .text-orange-700 { color: #c2410c !important; }
+        .text-gray-500 { color: #6b7280 !important; }
+        .text-gray-600 { color: #4b5563 !important; }
+        .text-gray-700 { color: #374151 !important; }
+        .text-gray-800 { color: #1f2937 !important; }
+        .text-gray-900 { color: #111827 !important; }
+      `;
+      document.head.appendChild(styleOverride);
+
+      // Wait for styles to apply
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       const pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
@@ -49,6 +119,12 @@ export default function ResidentsPrint({
       // Use jsPDF's html method for better pagination that respects element boundaries
       await pdf.html(offscreenRef.current, {
         callback: function (pdf) {
+          // Remove the style override
+          const styleEl = document.getElementById('pdf-color-override');
+          if (styleEl) {
+            document.head.removeChild(styleEl);
+          }
+
           const sanitizedName = building.name
             .trim()
             .replace(/[^\w\s\u0980-\u09FF-]/g, ' ')
@@ -74,6 +150,13 @@ export default function ResidentsPrint({
       });
     } catch (error) {
       console.error('Failed to generate PDF:', error);
+
+      // Clean up style override if error occurs
+      const styleEl = document.getElementById('pdf-color-override');
+      if (styleEl) {
+        document.head.removeChild(styleEl);
+      }
+
       setIsGeneratingPDF(false);
       alert(t.pdf?.downloading || 'Failed to generate PDF. Please try again.');
     }
