@@ -125,8 +125,9 @@ export default function BlankFormPreview({
       // Remove special characters and replace spaces with underscores
       const sanitized = billData.title
         .trim()
-        .replace(/[^\w\s\u0980-\u09FF-]/g, '') // Keep alphanumeric, spaces, and Bangla characters
-        .replace(/\s+/g, '_') // Replace spaces with underscore
+        .replace(/[^\w\s\u0980-\u09FF-]/g, ' ') // Replace special chars with space
+        .replace(/\s+/g, '_') // Replace multiple spaces with single underscore
+        .replace(/^_+|_+$/g, '') // Remove leading/trailing underscores
         .substring(0, 50); // Limit length
       fileName = sanitized ? `${sanitized}_blank.${extension}` : `blank_service_charge_form.${extension}`;
     }

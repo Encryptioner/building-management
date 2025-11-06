@@ -1,11 +1,7 @@
 export const en = {
-  meta: {
-    title: 'Service Charge Bill Calculator',
-    description: 'Create and manage service charge bills for apartment buildings with ease. Support for multiple categories, print preview, and PDF download.',
-  },
   currency: 'BDT',
   header: {
-    title: 'Service Charge Bill Calculator',
+    title: 'Bill Calculator',
     subtitle: 'Easily create and manage service charge bills for your building',
   },
   form: {
@@ -95,6 +91,10 @@ export const en = {
     share: 'Share',
     download: 'Download PDF',
     downloadImage: 'Download Image',
+    export: 'Export Data',
+    import: 'Import Data',
+    exporting: 'Exporting...',
+    importing: 'Importing...',
   },
   preview: {
     title: 'Bill Preview',
@@ -140,9 +140,10 @@ export const en = {
   },
   building: {
     setup: 'Setup Building',
-    welcome: 'Welcome to Residents Management',
+    welcome: 'Residents Management',
     welcomeDescription: 'Track residents, flats, and parking spaces for your building',
-    setupNote: 'Optional - Bills work without resident data',
+    title: 'Residents Management',
+    setupNote: 'Add resident information for each flat in your building',
     loadExampleData: 'Load Example Data',
     exampleDataNote: 'Start with sample data to see how the feature works',
     name: 'Building Name',

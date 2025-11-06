@@ -12,7 +12,6 @@ import CategoryForm from './CategoryForm';
 import BillPreview from './BillPreview';
 import BlankFormPreview from './BlankFormPreview';
 import HelpSection from './HelpSection';
-import LanguageSelector from './LanguageSelector';
 import ConfirmModal from './ConfirmModal';
 
 // Helper function to get empty bill data
@@ -327,7 +326,7 @@ export default function BillCalculator() {
           }`}>
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <img
-                src={`${import.meta.env.BASE_URL}icon.svg`}
+                src={`${import.meta.env.BASE_URL}icon-bills.svg`}
                 alt="Service Charge Icon"
                 className="w-8 h-8 flex-shrink-0"
               />
@@ -378,7 +377,7 @@ export default function BillCalculator() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
-                <span>{isImporting ? (language === 'bn' ? 'ইমপোর্ট...' : 'Import...') : (language === 'bn' ? 'ইমপোর্ট' : 'Import')}</span>
+                <span>{isImporting ? t.actions.importing : t.actions.import}</span>
               </button>
               <button
                 onClick={handleExport}
@@ -387,14 +386,10 @@ export default function BillCalculator() {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                <span>{language === 'bn' ? 'এক্সপোর্ট' : 'Export'}</span>
+                <span>{t.actions.export}</span>
               </button>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Language selector on desktop */}
-              <div className="hidden md:block">
-                <LanguageSelector currentLanguage={language} onLanguageChange={setLanguage} />
-              </div>
               {/* Expand button - always on the right */}
               <button
                 onClick={() => setIsHeaderCollapsed(false)}
@@ -431,7 +426,7 @@ export default function BillCalculator() {
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <img
-                  src={`${import.meta.env.BASE_URL}icon.svg`}
+                  src={`${import.meta.env.BASE_URL}icon-bills.svg`}
                   alt="Service Charge Icon"
                   className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
                 />
@@ -474,24 +469,23 @@ export default function BillCalculator() {
                 onClick={handleImportClick}
                 disabled={isImporting}
                 className="p-2 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                title={language === 'bn' ? 'ইমপোর্ট' : 'Import'}
+                title={t.actions.import}
               >
                 <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
-                <span className="hidden sm:inline">{isImporting ? (language === 'bn' ? 'ইমপোর্ট...' : 'Import...') : (language === 'bn' ? 'ইমপোর্ট' : 'Import')}</span>
+                <span className="hidden sm:inline">{isImporting ? t.actions.importing : t.actions.import}</span>
               </button>
               <button
                 onClick={handleExport}
                 className="p-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2"
-                title={language === 'bn' ? 'এক্সপোর্ট' : 'Export'}
+                title={t.actions.export}
               >
                 <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
-                <span className="hidden sm:inline">{language === 'bn' ? 'এক্সপোর্ট' : 'Export'}</span>
+                <span className="hidden sm:inline">{t.actions.export}</span>
               </button>
-              <LanguageSelector currentLanguage={language} onLanguageChange={setLanguage} />
             </div>
           </div>
 

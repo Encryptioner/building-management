@@ -1,34 +1,45 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <defs>
-    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#7c3aed;stop-opacity:1" />
+    <linearGradient id="faviconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3B82F6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8B5CF6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#EC4899;stop-opacity:1" />
     </linearGradient>
   </defs>
 
-  <!-- Background circle -->
-  <circle cx="64" cy="64" r="60" fill="url(#bgGradient)"/>
+  <!-- Background circle with gradient -->
+  <circle cx="64" cy="64" r="60" fill="url(#faviconGradient)"/>
 
-  <!-- Document/Bill icon -->
-  <path d="M45 30 h38 a8 8 0 0 1 8 8 v52 a8 8 0 0 1 -8 8 h-38 a8 8 0 0 1 -8 -8 v-52 a8 8 0 0 1 8 -8 z"
-        fill="#ffffff" opacity="0.95"/>
+  <!-- Building & Calculator combined icon -->
+  <!-- Building left side -->
+  <rect x="30" y="40" width="35" height="55" rx="2" fill="#ffffff" opacity="0.95"/>
 
-  <!-- Bill lines -->
-  <line x1="50" y1="48" x2="78" y2="48" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
-  <line x1="50" y1="58" x2="78" y2="58" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
-  <line x1="50" y1="68" x2="78" y2="68" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Windows - 2 columns, 5 rows -->
+  <rect x="35" y="45" width="7" height="6" rx="1" fill="#3B82F6"/>
+  <rect x="52" y="45" width="7" height="6" rx="1" fill="#3B82F6"/>
 
-  <!-- BDT symbol (৳) -->
-  <text x="64" y="88"
-        font-family="Arial, sans-serif"
-        font-size="22"
-        font-weight="bold"
-        fill="#7c3aed"
-        text-anchor="middle">৳</text>
+  <rect x="35" y="54" width="7" height="6" rx="1" fill="#3B82F6"/>
+  <rect x="52" y="54" width="7" height="6" rx="1" fill="#3B82F6"/>
+
+  <rect x="35" y="63" width="7" height="6" rx="1" fill="#3B82F6"/>
+  <rect x="52" y="63" width="7" height="6" rx="1" fill="#3B82F6"/>
+
+  <rect x="35" y="72" width="7" height="6" rx="1" fill="#8B5CF6"/>
+  <rect x="52" y="72" width="7" height="6" rx="1" fill="#8B5CF6"/>
+
+  <!-- Door -->
+  <rect x="43" y="83" width="11" height="12" rx="1" fill="#8B5CF6"/>
+
+  <!-- Calculator/Money overlay right side -->
+  <circle cx="80" cy="75" r="20" fill="#ffffff" opacity="0.95"/>
+  <circle cx="80" cy="75" r="18" fill="#EC4899"/>
+
+  <!-- Currency symbol -->
+  <text x="80" y="84" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">৳</text>
 
   <style>
     @media (prefers-color-scheme: dark) {
-      circle { filter: brightness(1.1); }
+      circle:first-of-type { filter: brightness(1.1); }
     }
   </style>
 </svg>

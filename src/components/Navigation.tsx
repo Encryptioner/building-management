@@ -53,41 +53,116 @@ export default function Navigation({ children }: NavigationProps) {
       {/* Navigation Header */}
       <header className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Building Management Title */}
-          <div className="border-b border-gray-200 py-3">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 text-center">
-              {t.navigation.appTitle}
-            </h1>
+          {/* Mobile Layout: Title on top, tabs and language below */}
+          <div className="md:hidden">
+            {/* App Title with Main Icon - Mobile */}
+            <div className="border-b border-gray-200 py-3">
+              <div className="flex items-center justify-center gap-2">
+                <img
+                  src={`${import.meta.env.BASE_URL}favicon.svg`}
+                  alt="App Icon"
+                  className="w-8 h-8"
+                />
+                <h1 className="text-xl font-bold text-gray-900">
+                  {t.navigation.appTitle}
+                </h1>
+              </div>
+            </div>
+
+            {/* Tabs and Language - Mobile */}
+            <div className="flex items-center justify-between h-16">
+              {/* Tab Navigation */}
+              <nav className="flex gap-1">
+                <button
+                  onClick={() => handleTabChange('bills')}
+                  className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-all flex items-center gap-1.5 ${
+                    activeTab === 'bills'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  aria-label={t.navigation.bills}
+                >
+                  <img
+                    src={`${import.meta.env.BASE_URL}icon-bills.svg`}
+                    alt="Bills Icon"
+                    className="w-4 h-4"
+                  />
+                  {t.navigation.bills}
+                </button>
+                <button
+                  onClick={() => handleTabChange('residents')}
+                  className={`px-3 py-2 font-medium text-sm rounded-t-lg transition-all flex items-center gap-1.5 ${
+                    activeTab === 'residents'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                  aria-label={t.navigation.residents}
+                >
+                  <img
+                    src={`${import.meta.env.BASE_URL}icon-residents.svg`}
+                    alt="Residents Icon"
+                    className="w-4 h-4"
+                  />
+                  {t.navigation.residents}
+                </button>
+              </nav>
+
+              {/* Language Selector */}
+              <LanguageSelector currentLanguage={language} onLanguageChange={handleLanguageChange} />
+            </div>
           </div>
 
-          <div className="flex items-center justify-between h-16">
-            {/* Tab Navigation */}
-            <nav className="flex gap-1 sm:gap-2">
+          {/* Desktop Layout: Tabs left, Title center, Language right in single row */}
+          <div className="hidden md:flex items-center justify-between h-16">
+            {/* Tab Navigation - Desktop */}
+            <nav className="flex gap-2">
               <button
                 onClick={() => handleTabChange('bills')}
-                className={`px-3 sm:px-6 py-2 font-medium text-sm sm:text-base rounded-t-lg transition-all ${
+                className={`px-6 py-2 font-medium text-base rounded-t-lg transition-all flex items-center gap-2 ${
                   activeTab === 'bills'
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
                 aria-label={t.navigation.bills}
               >
+                <img
+                  src={`${import.meta.env.BASE_URL}icon-bills.svg`}
+                  alt="Bills Icon"
+                  className="w-5 h-5"
+                />
                 {t.navigation.bills}
               </button>
               <button
                 onClick={() => handleTabChange('residents')}
-                className={`px-3 sm:px-6 py-2 font-medium text-sm sm:text-base rounded-t-lg transition-all ${
+                className={`px-6 py-2 font-medium text-base rounded-t-lg transition-all flex items-center gap-2 ${
                   activeTab === 'residents'
                     ? 'bg-blue-600 text-white shadow-md'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
                 aria-label={t.navigation.residents}
               >
+                <img
+                  src={`${import.meta.env.BASE_URL}icon-residents.svg`}
+                  alt="Residents Icon"
+                  className="w-5 h-5"
+                />
                 {t.navigation.residents}
               </button>
             </nav>
 
-            {/* Language Selector */}
+            {/* App Title with Main Icon - Desktop Center */}
+            <div className="flex items-center gap-2 absolute left-1/2 transform -translate-x-1/2">
+              <img
+                src={`${import.meta.env.BASE_URL}favicon.svg`}
+                alt="App Icon"
+                className="w-7 h-7"
+              />
+              <h1 className="text-2xl font-bold text-gray-900">
+                {t.navigation.appTitle}
+              </h1>
+            </div>
+
+            {/* Language Selector - Desktop */}
             <LanguageSelector currentLanguage={language} onLanguageChange={handleLanguageChange} />
           </div>
         </div>

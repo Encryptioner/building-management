@@ -229,17 +229,17 @@ export default function FlatForm({ language, flat, onSuccess, onCancel }: FlatFo
             {/* Action Buttons */}
             <div className="flex gap-3 pt-4">
               <button
-                type="submit"
-                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              >
-                {t.flat.save}
-              </button>
-              <button
                 type="button"
                 onClick={onCancel}
                 className="flex-1 bg-gray-200 text-gray-700 py-3 px-6 rounded-lg font-medium hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
               >
                 {t.flat.cancel}
+              </button>
+              <button
+                type="submit"
+                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                {t.flat.save}
               </button>
             </div>
           </form>

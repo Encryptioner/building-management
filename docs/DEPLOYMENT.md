@@ -209,7 +209,6 @@ dist/
 ├── service-charge/
 │   ├── index.html
 │   ├── favicon.svg
-│   ├── icon.svg
 │   ├── manifest.json       # Points to /service-charge/
 │   ├── sw.js               # Auto-detects /service-charge/
 │   └── _astro/
@@ -221,7 +220,6 @@ dist/
 dist/
 ├── index.html
 ├── favicon.svg
-├── icon.svg
 ├── manifest.json           # Points to /
 ├── sw.js                   # Auto-detects /
 └── _astro/

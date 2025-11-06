@@ -37,14 +37,19 @@ export default function ResidentsPrint({
       :root, :host, * {
         --color-blue-50: #eff6ff !important;
         --color-blue-100: #dbeafe !important;
+        --color-blue-200: #bfdbfe !important;
         --color-blue-600: #2563eb !important;
         --color-blue-700: #1d4ed8 !important;
         --color-green-50: #f0fdf4 !important;
         --color-green-100: #dcfce7 !important;
+        --color-green-200: #bbf7d0 !important;
         --color-green-600: #16a34a !important;
+        --color-green-700: #15803d !important;
         --color-orange-50: #fff7ed !important;
         --color-orange-100: #ffedd5 !important;
+        --color-orange-200: #fed7aa !important;
         --color-orange-600: #ea580c !important;
+        --color-orange-700: #c2410c !important;
         --color-gray-50: #f9fafb !important;
         --color-gray-100: #f3f4f6 !important;
         --color-gray-200: #e5e7eb !important;
@@ -81,7 +86,9 @@ export default function ResidentsPrint({
       .text-blue-600 { color: #2563eb !important; }
       .text-blue-700 { color: #1d4ed8 !important; }
       .text-green-600 { color: #16a34a !important; }
+      .text-green-700 { color: #15803d !important; }
       .text-orange-600 { color: #ea580c !important; }
+      .text-orange-700 { color: #c2410c !important; }
       .text-gray-500 { color: #6b7280 !important; }
       .text-gray-600 { color: #4b5563 !important; }
       .text-gray-700 { color: #374151 !important; }
@@ -90,22 +97,25 @@ export default function ResidentsPrint({
     `;
     document.head.appendChild(styleOverride);
 
-    try {
-      const canvas = await html2canvas(offscreenRef.current, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
+    // Wait a tick for styles to apply
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-      return canvas;
-    } finally {
-      // Clean up the style override
-      const styleEl = document.getElementById('pdf-color-override');
-      if (styleEl) {
-        styleEl.remove();
-      }
-    }
+    const canvas = await html2canvas(offscreenRef.current, {
+      scale: 2,
+      logging: false,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      removeContainer: false,
+      imageTimeout: 0,
+      width: 794, // A4 width in pixels at 96 DPI (210mm)
+      windowWidth: 794,
+    });
+
+    // Remove the style override
+    document.head.removeChild(styleOverride);
+
+    return canvas;
   };
 
   const handleDownloadPDF = async () => {
@@ -137,7 +147,12 @@ export default function ResidentsPrint({
         imgHeight * ratio
       );
 
-      const fileName = `${building.name.replace(/[^a-z0-9]/gi, '_')}_residents_${
+      const sanitizedName = building.name
+        .trim()
+        .replace(/[^\w\s\u0980-\u09FF-]/g, ' ') // Replace special chars with space
+        .replace(/\s+/g, '_') // Replace multiple spaces with single underscore
+        .replace(/^_+|_+$/g, ''); // Remove leading/trailing underscores
+      const fileName = `${sanitizedName}_residents_${
         new Date().toISOString().split('T')[0]
       }.pdf`;
       pdf.save(fileName);

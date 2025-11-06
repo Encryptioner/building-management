@@ -9,6 +9,7 @@ interface ConfirmModalProps {
   confirmText: string;
   cancelText: string;
   language: SupportedLanguage;
+  isDangerous?: boolean;
 }
 
 export default function ConfirmModal({
@@ -19,18 +20,25 @@ export default function ConfirmModal({
   message,
   confirmText,
   cancelText,
+  isDangerous = true,
 }: ConfirmModalProps) {
   if (!isOpen) return null;
+
+  const iconBgClass = isDangerous ? 'bg-red-100' : 'bg-blue-100';
+  const iconColorClass = isDangerous ? 'text-red-600' : 'text-blue-600';
+  const confirmButtonClass = isDangerous
+    ? 'bg-red-600 hover:bg-red-700'
+    : 'bg-blue-600 hover:bg-blue-700';
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl shadow-2xl max-w-md w-full animate-scale-in">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-4 sm:p-6 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+            <div className={`w-10 h-10 sm:w-12 sm:h-12 ${iconBgClass} rounded-full flex items-center justify-center flex-shrink-0`}>
               <svg
-                className="w-6 h-6 text-red-600"
+                className={`w-5 h-5 sm:w-6 sm:h-6 ${iconColorClass}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -43,26 +51,26 @@ export default function ConfirmModal({
                 />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900">{title}</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900">{title}</h3>
           </div>
         </div>
 
         {/* Body */}
-        <div className="p-6">
-          <p className="text-gray-700">{message}</p>
+        <div className="p-4 sm:p-6">
+          <p className="text-sm sm:text-base text-gray-700">{message}</p>
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 flex gap-3 justify-end">
+        <div className="p-4 sm:p-6 border-t border-gray-200 flex gap-2 sm:gap-3 justify-end">
           <button
             onClick={onCancel}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
+            className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium"
           >
             {cancelText}
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium"
+            className={`px-3 sm:px-4 py-2 text-sm sm:text-base ${confirmButtonClass} text-white rounded-lg transition-colors font-medium`}
           >
             {confirmText}
           </button>
