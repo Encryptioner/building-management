@@ -2,10 +2,11 @@ import { useState } from 'react';
 import type { Flat } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
 import { getTranslations } from '../../utils/i18n';
-import { getFlatsByFloor } from '../../utils/buildingStorage';
+import { getFlatsByFloor, deleteFlat, getFlat } from '../../utils/buildingStorage';
 import FlatCard from './FlatCard';
 import FlatDetail from './FlatDetail';
 import FlatForm from './FlatForm';
+import ConfirmModal from '../ConfirmModal';
 
 interface FlatListProps {
   language: SupportedLanguage;
@@ -16,7 +17,9 @@ export default function FlatList({ language, onUpdate }: FlatListProps) {
   const [selectedFlat, setSelectedFlat] = useState<Flat | null>(null);
   const [editingFlat, setEditingFlat] = useState<Flat | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [preselectedFloor, setPreselectedFloor] = useState<string | undefined>(undefined);
   const [collapsedFloors, setCollapsedFloors] = useState<Set<string>>(new Set());
+  const [deletingFlat, setDeletingFlat] = useState<Flat | null>(null);
 
   const t = getTranslations(language);
   const flatsByFloor = getFlatsByFloor();
@@ -34,15 +37,24 @@ export default function FlatList({ language, onUpdate }: FlatListProps) {
   const handleFormSuccess = () => {
     setShowAddForm(false);
     setEditingFlat(null);
+    setPreselectedFloor(undefined);
     onUpdate();
   };
 
   const handleFormCancel = () => {
     setShowAddForm(false);
     setEditingFlat(null);
+    setPreselectedFloor(undefined);
   };
 
   const handleDetailUpdate = () => {
+    // Refresh the selected flat data after update
+    if (selectedFlat) {
+      const updatedFlat = getFlat(selectedFlat.id);
+      if (updatedFlat) {
+        setSelectedFlat(updatedFlat);
+      }
+    }
     onUpdate();
   };
 
@@ -51,6 +63,24 @@ export default function FlatList({ language, onUpdate }: FlatListProps) {
       setEditingFlat(selectedFlat);
       setSelectedFlat(null);
     }
+  };
+
+  const handleDeleteFlat = (flat: Flat) => {
+    setDeletingFlat(flat);
+  };
+
+  const confirmDeleteFlat = () => {
+    if (deletingFlat && deleteFlat(deletingFlat.id)) {
+      setDeletingFlat(null);
+      onUpdate();
+    } else {
+      alert('Failed to delete flat. Please try again.');
+    }
+  };
+
+  const handleAddFlatForFloor = (floor: string) => {
+    setPreselectedFloor(floor);
+    setShowAddForm(true);
   };
 
   if (flatsByFloor.size === 0) {
@@ -97,11 +127,11 @@ export default function FlatList({ language, onUpdate }: FlatListProps) {
           return (
             <div key={floor} className="bg-white rounded-2xl shadow-lg overflow-hidden">
               {/* Floor Header */}
-              <button
-                onClick={() => toggleFloor(floor)}
-                className="w-full flex items-center justify-between p-4 sm:p-6 hover:bg-gray-50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
+              <div className="flex items-center justify-between p-4 sm:p-6 hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={() => toggleFloor(floor)}
+                  className="flex-1 flex items-center gap-3"
+                >
                   <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                     <span className="text-lg font-bold text-blue-600">{floor}</span>
                   </div>
@@ -111,16 +141,35 @@ export default function FlatList({ language, onUpdate }: FlatListProps) {
                       {flats.length} {flats.length === 1 ? 'flat' : 'flats'}
                     </p>
                   </div>
+                </button>
+                <div className="flex items-center gap-2">
+                  {/* Add Flat for this floor */}
+                  <button
+                    onClick={() => handleAddFlatForFloor(floor)}
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title={t.flat.add}
+                    aria-label={`${t.flat.add} - ${floorLabel}`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
+                  {/* Collapse/Expand */}
+                  <button
+                    onClick={() => toggleFloor(floor)}
+                    className="p-2"
+                  >
+                    <svg
+                      className={`w-6 h-6 text-gray-400 transition-transform ${isCollapsed ? '' : 'rotate-180'}`}
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
                 </div>
-                <svg
-                  className={`w-6 h-6 text-gray-400 transition-transform ${isCollapsed ? '' : 'rotate-180'}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+              </div>
 
               {/* Flats Grid */}
               {!isCollapsed && (
@@ -131,6 +180,7 @@ export default function FlatList({ language, onUpdate }: FlatListProps) {
                       flat={flat}
                       language={language}
                       onViewDetails={() => setSelectedFlat(flat)}
+                      onDelete={() => handleDeleteFlat(flat)}
                     />
                   ))}
                 </div>
@@ -167,8 +217,27 @@ export default function FlatList({ language, onUpdate }: FlatListProps) {
         <FlatForm
           language={language}
           flat={editingFlat || undefined}
+          preselectedFloor={preselectedFloor}
           onSuccess={handleFormSuccess}
           onCancel={handleFormCancel}
+        />
+      )}
+
+      {/* Delete Flat Confirmation */}
+      {deletingFlat && (
+        <ConfirmModal
+          isOpen={!!deletingFlat}
+          title={t.flat.delete}
+          message={
+            deletingFlat.residents.length > 0
+              ? t.flat.confirmDeleteWithResidents.replace('{count}', deletingFlat.residents.length.toString())
+              : t.flat.confirmDelete
+          }
+          confirmText={t.flat.delete}
+          cancelText={t.flat.cancel}
+          onConfirm={confirmDeleteFlat}
+          onCancel={() => setDeletingFlat(null)}
+          language={language}
         />
       )}
     </>

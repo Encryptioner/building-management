@@ -59,7 +59,7 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
 
   const handleLoadExampleData = () => {
     try {
-      const exampleBuilding = generateExampleBuildingData();
+      const exampleBuilding = generateExampleBuildingData(language);
       saveBuilding(exampleBuilding);
       loadBuildingData();
     } catch (error) {
@@ -197,16 +197,6 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
               </svg>
               <span className="hidden sm:inline">{t.actions.export}</span>
             </button>
-            <button
-              onClick={() => setShowPrint(true)}
-              className="p-2 sm:px-4 sm:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2"
-              title={language === 'bn' ? 'প্রিন্ট' : 'Print'}
-            >
-              <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-              </svg>
-              <span className="hidden sm:inline">{language === 'bn' ? 'প্রিন্ট' : 'Print'}</span>
-            </button>
           </div>
         </div>
 
@@ -251,44 +241,36 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
       </div>
 
       <div className="space-y-6">
-        {/* Building Info Section - Centered on Large Screens */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Building Information - Full width with Clear All button */}
-          <div className="lg:col-span-12">
-            <BuildingInfo building={building} language={language} onUpdate={handleUpdate} />
-
-            {/* Clear All Button - Danger Zone */}
-            <div className="mt-6 bg-red-50 border border-red-200 rounded-xl p-6">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-red-900 mb-2 flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                    {language === 'bn' ? 'বিপদ অঞ্চল' : 'Danger Zone'}
-                  </h3>
-                  <p className="text-sm text-red-700">
-                    {language === 'bn'
-                      ? 'এই বাটনটি ক্লিক করলে সমস্ত বিল্ডিং এবং বাসিন্দাদের ডেটা স্থায়ীভাবে মুছে যাবে।'
-                      : 'Clicking this button will permanently delete all building and resident data.'}
-                  </p>
-                </div>
-                <button
-                  onClick={() => setShowClearConfirm(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-red-600 to-rose-700 text-white rounded-lg hover:from-red-700 hover:to-rose-800 transition-all font-medium flex items-center gap-2 shadow-md hover:shadow-lg"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                  <span>{t.actions.clearAll}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Building Info Section */}
+        <BuildingInfo building={building} language={language} onUpdate={handleUpdate} />
 
         {/* Flats List */}
         <FlatList language={language} onUpdate={handleUpdate} />
+      </div>
+
+      {/* Bottom Action Buttons */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-8">
+        <div className="flex justify-center gap-4">
+          <button
+            onClick={() => setShowClearConfirm(true)}
+            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            {t.actions.clearAll}
+          </button>
+          <button
+            onClick={() => setShowPrint(true)}
+            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+            {t.actions.preview}
+          </button>
+        </div>
       </div>
 
       {/* Print Modal */}

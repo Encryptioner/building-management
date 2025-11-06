@@ -72,7 +72,7 @@ export default function BuildingSetup({ language, onSetupComplete }: BuildingSet
 
   const handleLoadExampleData = () => {
     try {
-      const exampleBuilding = generateExampleBuildingData();
+      const exampleBuilding = generateExampleBuildingData(language);
       saveBuilding(exampleBuilding);
       onSetupComplete();
     } catch (error) {

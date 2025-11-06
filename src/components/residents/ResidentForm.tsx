@@ -100,7 +100,7 @@ export default function ResidentForm({ language, flatId, resident, onSuccess, on
         {/* Name */}
         <div>
           <label htmlFor="resident-name" className="block text-sm font-medium text-gray-700 mb-2">
-            {t.resident.name}
+            {t.resident.name} <span className="text-red-600">*</span>
           </label>
           <input
             id="resident-name"
@@ -121,7 +121,7 @@ export default function ResidentForm({ language, flatId, resident, onSuccess, on
         {/* Phone */}
         <div>
           <label htmlFor="resident-phone" className="block text-sm font-medium text-gray-700 mb-2">
-            {t.resident.phone}
+            {t.resident.phone} <span className="text-red-600">*</span>
           </label>
           <input
             id="resident-phone"
@@ -205,17 +205,17 @@ export default function ResidentForm({ language, flatId, resident, onSuccess, on
         {/* Action Buttons */}
         <div className="flex gap-3 pt-2">
           <button
-            type="submit"
-            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-          >
-            {t.resident.save}
-          </button>
-          <button
             type="button"
             onClick={onCancel}
             className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
           >
             {t.resident.cancel}
+          </button>
+          <button
+            type="submit"
+            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            {t.resident.save}
           </button>
         </div>
       </form>

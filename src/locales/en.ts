@@ -2,7 +2,7 @@ export const en = {
   currency: 'BDT',
   header: {
     title: 'Bill Calculator',
-    subtitle: 'Easily create and manage service charge bills for your building',
+    subtitle: 'Manage your building with ease - residents, bills, and more',
   },
   form: {
     billTitle: 'Bill Title',
@@ -42,7 +42,7 @@ export const en = {
     notesHelp: 'Any additional information or instructions',
   },
   category: {
-    title: 'Service Charge Categories',
+    title: 'Bill Categories',
     addCategory: 'Add Category',
     noCategoriesYet: 'No categories added yet. Click "Add Category" to get started.',
     categoryName: 'Category Name',
@@ -107,7 +107,7 @@ export const en = {
     amount: 'Amount',
     calculatedBill: 'Calculated Bill',
     blankForm: 'Blank Form',
-    shareText: 'Service Charge Bill',
+    shareText: 'Building Bill',
   },
   tabs: {
     calculatedMode: 'Calculated Mode',
@@ -119,7 +119,7 @@ export const en = {
     createdBy: 'Created by',
   },
   help: {
-    welcome: 'Welcome! This tool helps you create service charge bills for apartment buildings.',
+    welcome: 'Welcome! This tool helps you manage your building and create bills for apartment buildings.',
     calculatedWelcome: 'Calculated Mode: Automatically calculates bill amounts and generates detailed bills.',
     blankWelcome: 'Blank Form Mode: Creates printable blank forms that you can fill in manually later.',
     calculatedStep1: '1. Enter the number of flats in your building',

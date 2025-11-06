@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Flat, Resident } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
-import { getTranslations, getConfirmationMessages } from '../../utils/i18n';
+import { getTranslations } from '../../utils/i18n';
 import { deleteFlat, deleteResident } from '../../utils/buildingStorage';
 import ResidentForm from './ResidentForm';
 import ResidentCard from './ResidentCard';
@@ -22,7 +22,6 @@ export default function FlatDetail({ flat, language, onClose, onUpdate, onEditFl
   const [deletingResidentId, setDeletingResidentId] = useState<string | null>(null);
 
   const t = getTranslations(language);
-  const confirmMsgs = getConfirmationMessages(language);
 
   const handleDeleteFlat = () => {
     if (deleteFlat(flat.id)) {

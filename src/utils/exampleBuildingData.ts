@@ -1,10 +1,18 @@
 import type { Building } from '../types';
+import type { SupportedLanguage } from '../locales/config';
 
 /**
  * Generate example building data with sample flats and residents
  * This helps users understand the feature without entering data manually
  */
-export function generateExampleBuildingData(): Building {
+export function generateExampleBuildingData(language: SupportedLanguage = 'bn'): Building {
+  return language === 'en' ? generateEnglishExampleData() : generateBanglaExampleData();
+}
+
+/**
+ * Generate Bangla example building data
+ */
+function generateBanglaExampleData(): Building {
   const buildingId = crypto.randomUUID();
   const now = new Date().toISOString();
 
@@ -12,17 +20,17 @@ export function generateExampleBuildingData(): Building {
     id: buildingId,
     name: 'গ্রিন টাওয়ার (Green Tower)',
     address: 'গুলশান-২, ঢাকা-১২১২ (Gulshan-2, Dhaka-1212)',
-    totalFloors: 5,
+    totalFloors: 10,
     flats: [
-      // Ground Floor
+      // Ground Floor - Only one flat
       {
         id: crypto.randomUUID(),
         flatNumber: 'G-1',
         floorNumber: 'G',
-        ownershipType: 'owned',
-        motorcycleParkingCount: 1,
+        ownershipType: 'rented',
+        motorcycleParkingCount: 0,
         carParkingCount: 0,
-        notes: 'গ্রাউন্ড ফ্লোর, রাস্তার পাশে (Ground floor, street side)',
+        notes: 'গ্রাউন্ড ফ্লোর, প্রধান প্রবেশদ্বার (Ground floor, main entrance)',
         residents: [
           {
             id: crypto.randomUUID(),
@@ -31,26 +39,7 @@ export function generateExampleBuildingData(): Building {
             email: 'rahim.ahmed@email.com',
             nid: '1234567890',
             moveInDate: '2020-01-15',
-            notes: 'মালিক, পরিবার সহ ৪ জন (Owner, family of 4)',
-          },
-        ],
-      },
-      {
-        id: crypto.randomUUID(),
-        flatNumber: 'G-2',
-        floorNumber: 'G',
-        ownershipType: 'rented',
-        motorcycleParkingCount: 0,
-        carParkingCount: 1,
-        notes: 'গ্রাউন্ড ফ্লোর, বাগানের পাশে (Ground floor, garden side)',
-        residents: [
-          {
-            id: crypto.randomUUID(),
-            name: 'সারাহ খান (Sarah Khan)',
-            phone: '+880 1812-345678',
-            email: 'sarah.khan@email.com',
-            moveInDate: '2023-06-01',
-            notes: 'ভাড়াটিয়া, স্বামী-স্ত্রী (Tenant, couple)',
+            notes: 'গার্ড, পরিবার সহ ৪ জন (Owner, family of 4)',
           },
         ],
       },
@@ -248,7 +237,7 @@ export function generateExampleBuildingData(): Building {
         ownershipType: 'owned',
         motorcycleParkingCount: 0,
         carParkingCount: 1,
-        notes: '৫ম তলা, পশ্চিম দিক, ছাদ অ্যাক্সেস (5th floor, west side, roof access)',
+        notes: '৫ম তলা, পশ্চিম দিক (5th floor, west side)',
         residents: [
           {
             id: crypto.randomUUID(),
@@ -265,6 +254,672 @@ export function generateExampleBuildingData(): Building {
             email: 'imran.b@email.com',
             moveInDate: '2022-05-20',
             notes: 'স্বামী, প্রকৌশলী (Spouse, engineer)',
+          },
+        ],
+      },
+      // Floor 6
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '6A',
+        floorNumber: '6',
+        ownershipType: 'rented',
+        motorcycleParkingCount: 1,
+        carParkingCount: 0,
+        notes: '৬ষ্ঠ তলা, পূর্ব দিক (6th floor, east side)',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'আশিক মাহমুদ (Ashik Mahmud)',
+            phone: '+880 1412-567890',
+            email: 'ashik.mahmud@email.com',
+            moveInDate: '2023-11-01',
+            notes: 'ভাড়াটিয়া, ফটোগ্রাফার (Tenant, photographer)',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '6B',
+        floorNumber: '6',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 0,
+        carParkingCount: 0,
+        notes: '৬ষ্ঠ তলা, পশ্চিম দিক (6th floor, west side)',
+        residents: [],
+      },
+      // Floor 7
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '7A',
+        floorNumber: '7',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 1,
+        carParkingCount: 1,
+        notes: '৭ম তলা, পূর্ব দিক (7th floor, east side)',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'রফিক উল্লাহ (Rafiq Ullah)',
+            phone: '+880 1512-987654',
+            email: 'rafiq.ullah@email.com',
+            nid: '6789012345',
+            moveInDate: '2021-09-15',
+            notes: 'মালিক, ব্যবসায়ী (Owner, businessman)',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '7B',
+        floorNumber: '7',
+        ownershipType: 'rented',
+        motorcycleParkingCount: 0,
+        carParkingCount: 0,
+        notes: '৭ম তলা, পশ্চিম দিক (7th floor, west side)',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'মেহেরুন নেসা (Mehrun Nesa)',
+            phone: '+880 1612-987654',
+            email: 'mehrun.nesa@email.com',
+            moveInDate: '2024-03-01',
+            notes: 'ভাড়াটিয়া, শিক্ষক (Tenant, teacher)',
+          },
+        ],
+      },
+      // Floor 8
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '8A',
+        floorNumber: '8',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 2,
+        carParkingCount: 0,
+        notes: '৮ম তলা, পূর্ব দিক (8th floor, east side)',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'হাসান জামিল (Hasan Jamil)',
+            phone: '+880 1712-234567',
+            email: 'hasan.jamil@email.com',
+            nid: '7890123456',
+            moveInDate: '2020-05-10',
+            notes: 'মালিক, সফটওয়্যার ডেভেলপার (Owner, software developer)',
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'নুসরাত জামিল (Nusrat Jamil)',
+            phone: '+880 1812-234567',
+            email: 'nusrat.jamil@email.com',
+            moveInDate: '2020-05-10',
+            notes: 'স্ত্রী, ডাক্তার (Spouse, doctor)',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '8B',
+        floorNumber: '8',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 0,
+        carParkingCount: 1,
+        notes: '৮ম তলা, পশ্চিম দিক (8th floor, west side)',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'সাদিয়া খানম (Sadia Khanam)',
+            phone: '+880 1912-234567',
+            email: 'sadia.khanam@email.com',
+            moveInDate: '2019-12-01',
+            notes: 'মালিক, লেখক (Owner, writer)',
+          },
+        ],
+      },
+      // Floor 9
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '9A',
+        floorNumber: '9',
+        ownershipType: 'rented',
+        motorcycleParkingCount: 1,
+        carParkingCount: 0,
+        notes: '৯ম তলা, পূর্ব দিক (9th floor, east side)',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'তৌহিদ আলম (Touhid Alam)',
+            phone: '+880 1312-234567',
+            email: 'touhid.alam@email.com',
+            moveInDate: '2024-01-01',
+            notes: 'ভাড়াটিয়া, মার্কেটিং ম্যানেজার (Tenant, marketing manager)',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '9B',
+        floorNumber: '9',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 0,
+        carParkingCount: 0,
+        notes: '৯ম তলা, পশ্চিম দিক (9th floor, west side)',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'শামীমা আক্তার (Shamima Akter)',
+            phone: '+880 1412-234567',
+            email: 'shamima.akter@email.com',
+            moveInDate: '2023-07-15',
+            notes: 'মালিক, স্থপতি (Owner, architect)',
+          },
+        ],
+      },
+      // Floor 10
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '10A',
+        floorNumber: '10',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 1,
+        carParkingCount: 1,
+        notes: '১০ম তলা, পূর্ব দিক, ছাদ অ্যাক্সেস (10th floor, east side, roof access)',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'জাকারিয়া হোসেন (Zakaria Hossain)',
+            phone: '+880 1512-234567',
+            email: 'zakaria.hossain@email.com',
+            nid: '8901234567',
+            moveInDate: '2018-03-20',
+            notes: 'মালিক, ব্যাংকার, পরিবার সহ ৩ জন (Owner, banker, family of 3)',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '10B',
+        floorNumber: '10',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 2,
+        carParkingCount: 1,
+        notes: '১০ম তলা, পশ্চিম দিক, ছাদ অ্যাক্সেস (10th floor, west side, roof access)',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'আনিসুল হক (Anisul Haque)',
+            phone: '+880 1612-234567',
+            email: 'anisul.haque@email.com',
+            nid: '9012345678',
+            moveInDate: '2017-06-10',
+            notes: 'মালিক, প্রফেসর (Owner, professor)',
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'রুমানা হক (Rumana Haque)',
+            phone: '+880 1712-234567',
+            email: 'rumana.haque@email.com',
+            moveInDate: '2017-06-10',
+            notes: 'স্ত্রী, সাংবাদিক (Spouse, journalist)',
+          },
+        ],
+      },
+    ],
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+/**
+ * Generate English example building data
+ */
+function generateEnglishExampleData(): Building {
+  const buildingId = crypto.randomUUID();
+  const now = new Date().toISOString();
+
+  return {
+    id: buildingId,
+    name: 'Green Tower',
+    address: 'Gulshan-2, Dhaka-1212',
+    totalFloors: 10,
+    flats: [
+      // Ground Floor - Only one flat
+      {
+        id: crypto.randomUUID(),
+        flatNumber: 'G-1',
+        floorNumber: 'G',
+        ownershipType: 'rented',
+        motorcycleParkingCount: 0,
+        carParkingCount: 0,
+        notes: 'Ground floor, main entrance',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Md. Rahim Ahmed',
+            phone: '+880 1712-345678',
+            email: 'rahim.ahmed@email.com',
+            nid: '1234567890',
+            moveInDate: '2020-01-15',
+            notes: 'Guard, family of 4',
+          },
+        ],
+      },
+      // Floor 1
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '1A',
+        floorNumber: '1',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 2,
+        carParkingCount: 0,
+        notes: '1st floor, east side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Dr. Karim Hossain',
+            phone: '+880 1912-345678',
+            email: 'karim.hossain@email.com',
+            nid: '2345678901',
+            moveInDate: '2019-03-10',
+            notes: 'Owner, physician',
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Naznin Hossain',
+            phone: '+880 1712-876543',
+            email: 'naznin.h@email.com',
+            moveInDate: '2019-03-10',
+            notes: 'Spouse',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '1B',
+        floorNumber: '1',
+        ownershipType: 'rented',
+        motorcycleParkingCount: 0,
+        carParkingCount: 0,
+        notes: '1st floor, west side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Tania Islam',
+            phone: '+880 1612-345678',
+            email: 'tania.islam@email.com',
+            moveInDate: '2024-01-15',
+            notes: 'Tenant, lives alone',
+          },
+        ],
+      },
+      // Floor 2
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '2A',
+        floorNumber: '2',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 0,
+        carParkingCount: 1,
+        notes: '2nd floor, east side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Abul Hasan',
+            phone: '+880 1512-345678',
+            email: 'abul.hasan@email.com',
+            nid: '3456789012',
+            moveInDate: '2018-07-20',
+            notes: 'Owner, businessman',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '2B',
+        floorNumber: '2',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 1,
+        carParkingCount: 0,
+        notes: '2nd floor, west side',
+        residents: [],
+      },
+      // Floor 3
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '3A',
+        floorNumber: '3',
+        ownershipType: 'rented',
+        motorcycleParkingCount: 1,
+        carParkingCount: 0,
+        notes: '3rd floor, east side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Rajib Chowdhury',
+            phone: '+880 1312-345678',
+            email: 'rajib.ch@email.com',
+            moveInDate: '2023-09-01',
+            notes: 'Tenant, software engineer',
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Priya Chowdhury',
+            phone: '+880 1712-567890',
+            email: 'priya.ch@email.com',
+            moveInDate: '2023-09-01',
+            notes: 'Spouse, teacher',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '3B',
+        floorNumber: '3',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 0,
+        carParkingCount: 1,
+        notes: '3rd floor, west side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Farhana Akter',
+            phone: '+880 1812-567890',
+            email: 'farhana.akter@email.com',
+            moveInDate: '2021-04-10',
+            notes: 'Owner, designer',
+          },
+        ],
+      },
+      // Floor 4
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '4A',
+        floorNumber: '4',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 1,
+        carParkingCount: 1,
+        notes: '4th floor, east side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Nasir Uddin',
+            phone: '+880 1612-567890',
+            email: 'nasir.uddin@email.com',
+            nid: '4567890123',
+            moveInDate: '2017-11-01',
+            notes: 'Owner, architect',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '4B',
+        floorNumber: '4',
+        ownershipType: 'rented',
+        motorcycleParkingCount: 0,
+        carParkingCount: 0,
+        notes: '4th floor, west side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Saima Rahman',
+            phone: '+880 1912-567890',
+            email: 'saima.rahman@email.com',
+            moveInDate: '2024-02-01',
+            notes: 'Tenant, bank officer',
+          },
+        ],
+      },
+      // Floor 5
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '5A',
+        floorNumber: '5',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 2,
+        carParkingCount: 1,
+        notes: '5th floor, east side, roof access',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Jamal Haque',
+            phone: '+880 1512-567890',
+            email: 'jamal.haque@email.com',
+            nid: '5678901234',
+            moveInDate: '2016-08-15',
+            notes: 'Owner, lawyer, family of 5',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '5B',
+        floorNumber: '5',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 0,
+        carParkingCount: 1,
+        notes: '5th floor, west side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Selina Begum',
+            phone: '+880 1312-567890',
+            email: 'selina.begum@email.com',
+            moveInDate: '2022-05-20',
+            notes: 'Owner, entrepreneur',
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Imran Begum',
+            phone: '+880 1712-987654',
+            email: 'imran.b@email.com',
+            moveInDate: '2022-05-20',
+            notes: 'Spouse, engineer',
+          },
+        ],
+      },
+      // Floor 6
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '6A',
+        floorNumber: '6',
+        ownershipType: 'rented',
+        motorcycleParkingCount: 1,
+        carParkingCount: 0,
+        notes: '6th floor, east side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Ashik Mahmud',
+            phone: '+880 1412-567890',
+            email: 'ashik.mahmud@email.com',
+            moveInDate: '2023-11-01',
+            notes: 'Tenant, photographer',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '6B',
+        floorNumber: '6',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 0,
+        carParkingCount: 0,
+        notes: '6th floor, west side',
+        residents: [],
+      },
+      // Floor 7
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '7A',
+        floorNumber: '7',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 1,
+        carParkingCount: 1,
+        notes: '7th floor, east side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Rafiq Ullah',
+            phone: '+880 1512-987654',
+            email: 'rafiq.ullah@email.com',
+            nid: '6789012345',
+            moveInDate: '2021-09-15',
+            notes: 'Owner, businessman',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '7B',
+        floorNumber: '7',
+        ownershipType: 'rented',
+        motorcycleParkingCount: 0,
+        carParkingCount: 0,
+        notes: '7th floor, west side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Mehrun Nesa',
+            phone: '+880 1612-987654',
+            email: 'mehrun.nesa@email.com',
+            moveInDate: '2024-03-01',
+            notes: 'Tenant, teacher',
+          },
+        ],
+      },
+      // Floor 8
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '8A',
+        floorNumber: '8',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 2,
+        carParkingCount: 0,
+        notes: '8th floor, east side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Hasan Jamil',
+            phone: '+880 1712-234567',
+            email: 'hasan.jamil@email.com',
+            nid: '7890123456',
+            moveInDate: '2020-05-10',
+            notes: 'Owner, software developer',
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Nusrat Jamil',
+            phone: '+880 1812-234567',
+            email: 'nusrat.jamil@email.com',
+            moveInDate: '2020-05-10',
+            notes: 'Spouse, doctor',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '8B',
+        floorNumber: '8',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 0,
+        carParkingCount: 1,
+        notes: '8th floor, west side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Sadia Khanam',
+            phone: '+880 1912-234567',
+            email: 'sadia.khanam@email.com',
+            moveInDate: '2019-12-01',
+            notes: 'Owner, writer',
+          },
+        ],
+      },
+      // Floor 9
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '9A',
+        floorNumber: '9',
+        ownershipType: 'rented',
+        motorcycleParkingCount: 1,
+        carParkingCount: 0,
+        notes: '9th floor, east side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Touhid Alam',
+            phone: '+880 1312-234567',
+            email: 'touhid.alam@email.com',
+            moveInDate: '2024-01-01',
+            notes: 'Tenant, marketing manager',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '9B',
+        floorNumber: '9',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 0,
+        carParkingCount: 0,
+        notes: '9th floor, west side',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Shamima Akter',
+            phone: '+880 1412-234567',
+            email: 'shamima.akter@email.com',
+            moveInDate: '2023-07-15',
+            notes: 'Owner, architect',
+          },
+        ],
+      },
+      // Floor 10
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '10A',
+        floorNumber: '10',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 1,
+        carParkingCount: 1,
+        notes: '10th floor, east side, roof access',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Zakaria Hossain',
+            phone: '+880 1512-234567',
+            email: 'zakaria.hossain@email.com',
+            nid: '8901234567',
+            moveInDate: '2018-03-20',
+            notes: 'Owner, banker, family of 3',
+          },
+        ],
+      },
+      {
+        id: crypto.randomUUID(),
+        flatNumber: '10B',
+        floorNumber: '10',
+        ownershipType: 'owned',
+        motorcycleParkingCount: 2,
+        carParkingCount: 1,
+        notes: '10th floor, west side, roof access',
+        residents: [
+          {
+            id: crypto.randomUUID(),
+            name: 'Anisul Haque',
+            phone: '+880 1612-234567',
+            email: 'anisul.haque@email.com',
+            nid: '9012345678',
+            moveInDate: '2017-06-10',
+            notes: 'Owner, professor',
+          },
+          {
+            id: crypto.randomUUID(),
+            name: 'Rumana Haque',
+            phone: '+880 1712-234567',
+            email: 'rumana.haque@email.com',
+            moveInDate: '2017-06-10',
+            notes: 'Spouse, journalist',
           },
         ],
       },

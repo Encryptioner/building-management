@@ -7,12 +7,13 @@ import { addFlat, updateFlat } from '../../utils/buildingStorage';
 interface FlatFormProps {
   language: SupportedLanguage;
   flat?: Flat; // If provided, we're editing; otherwise, adding new
+  preselectedFloor?: string; // If provided, preselect and disable floor selection
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export default function FlatForm({ language, flat, onSuccess, onCancel }: FlatFormProps) {
-  const [floorNumber, setFloorNumber] = useState(flat?.floorNumber || '');
+export default function FlatForm({ language, flat, preselectedFloor, onSuccess, onCancel }: FlatFormProps) {
+  const [floorNumber, setFloorNumber] = useState(flat?.floorNumber || preselectedFloor || '');
   const [flatNumber, setFlatNumber] = useState(flat?.flatNumber || '');
   const [ownershipType, setOwnershipType] = useState<FlatOwnershipType>(flat?.ownershipType || 'owned');
   const [motorcycleParkingCount, setMotorcycleParkingCount] = useState(flat?.motorcycleParkingCount.toString() || '0');
@@ -102,7 +103,7 @@ export default function FlatForm({ language, flat, onSuccess, onCancel }: FlatFo
             {/* Floor Number */}
             <div>
               <label htmlFor="floor-number" className="block text-sm font-medium text-gray-700 mb-2">
-                {t.flat.floorNumber}
+                {t.flat.floorNumber} <span className="text-red-600">*</span>
               </label>
               <input
                 id="floor-number"
@@ -110,20 +111,25 @@ export default function FlatForm({ language, flat, onSuccess, onCancel }: FlatFo
                 value={floorNumber}
                 onChange={(e) => setFloorNumber(e.target.value)}
                 placeholder={t.flat.floorNumberPlaceholder}
+                disabled={!!preselectedFloor && !isEditing}
                 className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
                   errors.floorNumber ? 'border-red-500' : 'border-gray-300'
-                }`}
+                } ${preselectedFloor && !isEditing ? 'bg-gray-100 cursor-not-allowed' : ''}`}
               />
               {errors.floorNumber && (
                 <p className="mt-1 text-sm text-red-600">{errors.floorNumber}</p>
               )}
-              <p className="mt-1 text-sm text-gray-500">{t.flat.floorNumberHelp}</p>
+              {preselectedFloor && !isEditing ? (
+                <p className="mt-1 text-sm text-blue-600">{language === 'bn' ? 'এই তলার জন্য স্বয়ংক্রিয়ভাবে নির্বাচিত' : 'Auto-selected for this floor'}</p>
+              ) : (
+                <p className="mt-1 text-sm text-gray-500">{t.flat.floorNumberHelp}</p>
+              )}
             </div>
 
             {/* Flat Number */}
             <div>
               <label htmlFor="flat-number" className="block text-sm font-medium text-gray-700 mb-2">
-                {t.flat.flatNumber}
+                {t.flat.flatNumber} <span className="text-red-600">*</span>
               </label>
               <input
                 id="flat-number"
