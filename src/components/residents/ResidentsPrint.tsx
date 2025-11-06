@@ -102,7 +102,7 @@ export default function ResidentsPrint({
     await new Promise(resolve => setTimeout(resolve, 100));
 
     const canvas = await html2canvas(offscreenRef.current, {
-      scale: 2,
+      scale: 1.2, // Reduced from 2 to 1.2 for smaller file size while maintaining quality
       logging: false,
       useCORS: true,
       allowTaint: true,
@@ -136,6 +136,7 @@ export default function ResidentsPrint({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
+        compress: true, // Enable PDF compression for smaller file size
       });
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -182,7 +183,8 @@ export default function ResidentsPrint({
           canvasWidth, pageCanvas.height  // Dest width, height
         );
 
-        const pageImgData = pageCanvas.toDataURL('image/png');
+        // Use JPEG with compression for much smaller file size
+        const pageImgData = pageCanvas.toDataURL('image/jpeg', 0.75);
 
         // Calculate dimensions to fit the page width with margins
         const imgWidth = pdfWidth;
@@ -190,7 +192,7 @@ export default function ResidentsPrint({
 
         pdf.addImage(
           pageImgData,
-          'PNG',
+          'JPEG',
           0,
           marginTop,
           imgWidth,
@@ -247,21 +249,21 @@ export default function ResidentsPrint({
 
   // Separate component for PDF rendering with fixed styling (no responsive classes)
   const PDFContent = () => (
-    <div className="bg-white p-8 max-w-4xl mx-auto" style={{ width: '794px' }}>
+    <div className="bg-white p-6 max-w-4xl mx-auto" style={{ width: '794px' }}>
       {/* Header */}
-      <div className="text-center mb-8 pb-6 border-b-2 border-gray-300">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      <div className="text-center mb-4 pb-3 border-b-2 border-gray-300">
+        <h1 className="text-2xl font-bold text-gray-900 mb-1">
           {t.building.residentList}
         </h1>
-        <h2 className="text-xl font-semibold text-blue-600 mb-1">{building.name}</h2>
-        <p className="text-gray-600">{building.address}</p>
-        <p className="text-sm text-gray-500 mt-2">
+        <h2 className="text-lg font-semibold text-blue-600 mb-1">{building.name}</h2>
+        <p className="text-sm text-gray-600">{building.address}</p>
+        <p className="text-xs text-gray-500 mt-1">
           {t.pdf.generatedOn}: {currentDate}
         </p>
       </div>
 
       {/* Statistics Summary */}
-      <div className="grid grid-cols-2 gap-4 mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <div className="grid grid-cols-2 gap-3 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
         <div>
           <p className="text-sm text-gray-600">{t.stats.totalFlats}</p>
           <p className="text-2xl font-bold text-blue-600">{totalFlats}</p>
@@ -296,11 +298,11 @@ export default function ResidentsPrint({
           : `${t.flat.floor} ${floor}`;
 
         return (
-          <div key={floor} className="mb-6">
+          <div key={floor} className="mb-3">
             {/* Floor Header */}
-            <div className="bg-gray-100 px-4 py-2 rounded-t-lg border-b-2 border-gray-300">
-              <h3 className="text-lg font-bold text-gray-900">{floorLabel}</h3>
-              <p className="text-sm text-gray-600">
+            <div className="bg-gray-100 px-3 py-1 rounded-t-lg border-b-2 border-gray-300">
+              <h3 className="text-base font-bold text-gray-900">{floorLabel}</h3>
+              <p className="text-xs text-gray-600">
                 {flats.length} {flats.length === 1 ? t.pdf.flat : t.pdf.flats}
               </p>
             </div>
@@ -310,16 +312,16 @@ export default function ResidentsPrint({
               {flats.map((flat, idx) => (
                 <div
                   key={flat.id}
-                  className={`p-4 ${idx > 0 ? 'border-t border-gray-200' : ''} ${
+                  className={`p-2 ${idx > 0 ? 'border-t border-gray-200' : ''} ${
                     flat.residents.length === 0 ? 'bg-gray-50' : ''
                   }`}
                 >
                   {/* Flat Header */}
-                  <div className="flex items-start justify-between mb-2">
+                  <div className="flex items-start justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-lg font-bold text-gray-900">{flat.flatNumber}</span>
+                      <span className="text-base font-bold text-gray-900">{flat.flatNumber}</span>
                       <span
-                        className={`text-xs px-2 py-1 rounded ${
+                        className={`text-xs px-1 py-0.5 rounded ${
                           flat.ownershipType === 'owned'
                             ? 'bg-green-100 text-green-700'
                             : 'bg-orange-100 text-orange-700'
@@ -328,7 +330,7 @@ export default function ResidentsPrint({
                         {flat.ownershipType === 'owned' ? t.flat.owned : t.flat.rented}
                       </span>
                     </div>
-                    <div className="text-right text-sm text-gray-600">
+                    <div className="text-right text-xs text-gray-600">
                       {flat.motorcycleParkingCount > 0 && (
                         <span className="mr-3">
                           🏍️ {flat.motorcycleParkingCount}
@@ -344,15 +346,15 @@ export default function ResidentsPrint({
 
                   {/* Residents */}
                   {flat.residents.length === 0 ? (
-                    <p className="text-sm text-gray-500 italic">
+                    <p className="text-xs text-gray-500 italic">
                       {t.pdf.noResidents}
                     </p>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       {flat.residents.map((resident) => (
-                        <div key={resident.id} className="bg-gray-50 p-3 rounded border border-gray-200">
-                          <p className="font-semibold text-gray-900">{resident.name}</p>
-                          <div className="grid grid-cols-2 gap-2 mt-1 text-sm text-gray-600">
+                        <div key={resident.id} className="bg-gray-50 p-2 rounded border border-gray-200">
+                          <p className="font-semibold text-sm text-gray-900">{resident.name}</p>
+                          <div className="grid grid-cols-2 gap-1 mt-0.5 text-xs text-gray-600">
                             {resident.phone && (
                               <div>
                                 <span className="font-medium">{t.pdf.phone}:</span>{' '}
@@ -379,7 +381,7 @@ export default function ResidentsPrint({
                             )}
                           </div>
                           {resident.notes && (
-                            <p className="text-sm text-gray-600 mt-1 italic">{resident.notes}</p>
+                            <p className="text-xs text-gray-600 mt-0.5 italic">{resident.notes}</p>
                           )}
                         </div>
                       ))}
@@ -388,7 +390,7 @@ export default function ResidentsPrint({
 
                   {/* Flat Notes */}
                   {flat.notes && (
-                    <p className="text-sm text-gray-600 mt-2 italic border-t border-gray-200 pt-2">
+                    <p className="text-xs text-gray-600 mt-1 italic border-t border-gray-200 pt-1">
                       {flat.notes}
                     </p>
                   )}
@@ -400,7 +402,7 @@ export default function ResidentsPrint({
       })}
 
       {/* Footer */}
-      <div className="mt-8 pt-4 border-t border-gray-300 text-center text-sm text-gray-500">
+      <div className="mt-4 pt-2 border-t border-gray-300 text-center text-xs text-gray-500">
         <p>
           {t.pdf.generatedBy}{' '}
           <a href={window.location.href} className="text-blue-600 underline">
