@@ -3,7 +3,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import type { BillData } from '../types';
 import type { SupportedLanguage } from '../locales/config';
-import { getTranslations, getLocaleCode, getUIMessages } from '../utils/i18n';
+import { getTranslations, getUIMessages } from '../utils/i18n';
 
 interface BlankFormPreviewProps {
   billData: BillData;
@@ -20,13 +20,6 @@ export default function BlankFormPreview({
   const uiMsgs = getUIMessages(language);
   const printRef = useRef<HTMLDivElement>(null);
   const offscreenRef = useRef<HTMLDivElement>(null);
-  const currentDate = new Date().toLocaleString(getLocaleCode(language), {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 
   const generateCanvas = async () => {
     if (!offscreenRef.current) return null;

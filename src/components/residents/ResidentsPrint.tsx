@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react';
-import jsPDF from 'jspdf';
 import type { Building, Flat } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
 import { getTranslations, getLocaleCode } from '../../utils/i18n';
+import { usePDFGeneratorManual } from '../../lib/pdf-generator/hooks';
 
 interface ResidentsPrintProps {
   building: Building;
@@ -16,9 +16,7 @@ export default function ResidentsPrint({
   onClose,
 }: ResidentsPrintProps) {
   const t = getTranslations(language);
-  const printRef = useRef<HTMLDivElement>(null);
   const offscreenRef = useRef<HTMLDivElement>(null);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const currentDate = new Date().toLocaleString(getLocaleCode(language), {
     year: 'numeric',
     month: 'long',
@@ -27,144 +25,40 @@ export default function ResidentsPrint({
     minute: '2-digit',
   });
 
+  // Use the new PDF generator library with optimized settings
+  const {
+    generatePDF: generatePDFLib,
+    isGenerating: isGeneratingPDF,
+    progress,
+  } = usePDFGeneratorManual({
+    format: 'a4',
+    orientation: 'portrait',
+    margins: [10, 10, 10, 10],
+    compress: true,
+    showPageNumbers: false,
+    imageQuality: 0.95, // Higher quality for better text rendering
+    scale: 3, // Higher scale for crisp text
+  });
+
   const handleDownloadPDF = async () => {
+    if (!offscreenRef.current) {
+      alert(t.pdf?.downloading || 'Failed to generate PDF. Please try again.');
+      return;
+    }
+
     try {
-      setIsGeneratingPDF(true);
+      const sanitizedName = building.name
+        .trim()
+        .replace(/[^\w\s\u0980-\u09FF-]/g, ' ')
+        .replace(/\s+/g, '_')
+        .replace(/^_+|_+$/g, '');
+      const fileName = `${sanitizedName}_residents_${
+        new Date().toISOString().split('T')[0]
+      }.pdf`;
 
-      // Small delay to allow UI to update with loading state
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      if (!offscreenRef.current) {
-        setIsGeneratingPDF(false);
-        return;
-      }
-
-      // Inject CSS to override OKLCH colors with hex equivalents ONLY for PDF generation
-      // Use a unique class to scope only to the offscreen element
-      const styleOverride = document.createElement('style');
-      styleOverride.id = 'pdf-color-override';
-      styleOverride.textContent = `
-        #pdf-render-target {
-          --color-blue-50: #eff6ff !important;
-          --color-blue-100: #dbeafe !important;
-          --color-blue-200: #bfdbfe !important;
-          --color-blue-600: #2563eb !important;
-          --color-blue-700: #1d4ed8 !important;
-          --color-green-50: #f0fdf4 !important;
-          --color-green-100: #dcfce7 !important;
-          --color-green-200: #bbf7d0 !important;
-          --color-green-600: #16a34a !important;
-          --color-green-700: #15803d !important;
-          --color-orange-50: #fff7ed !important;
-          --color-orange-100: #ffedd5 !important;
-          --color-orange-200: #fed7aa !important;
-          --color-orange-600: #ea580c !important;
-          --color-orange-700: #c2410c !important;
-          --color-gray-50: #f9fafb !important;
-          --color-gray-100: #f3f4f6 !important;
-          --color-gray-200: #e5e7eb !important;
-          --color-gray-300: #d1d5db !important;
-          --color-gray-400: #9ca3af !important;
-          --color-gray-500: #6b7280 !important;
-          --color-gray-600: #4b5563 !important;
-          --color-gray-700: #374151 !important;
-          --color-gray-800: #1f2937 !important;
-          --color-gray-900: #111827 !important;
-          --color-black: #000000 !important;
-          --color-white: #ffffff !important;
-        }
-
-        #pdf-render-target .bg-blue-50 { background-color: #eff6ff !important; }
-        #pdf-render-target .bg-blue-100 { background-color: #dbeafe !important; }
-        #pdf-render-target .bg-green-50 { background-color: #f0fdf4 !important; }
-        #pdf-render-target .bg-green-100 { background-color: #dcfce7 !important; }
-        #pdf-render-target .bg-orange-50 { background-color: #fff7ed !important; }
-        #pdf-render-target .bg-orange-100 { background-color: #ffedd5 !important; }
-        #pdf-render-target .bg-gray-50 { background-color: #f9fafb !important; }
-        #pdf-render-target .bg-gray-100 { background-color: #f3f4f6 !important; }
-        #pdf-render-target .bg-gray-200 { background-color: #e5e7eb !important; }
-
-        #pdf-render-target .border-blue-200 { border-color: #bfdbfe !important; }
-        #pdf-render-target .border-green-200 { border-color: #bbf7d0 !important; }
-        #pdf-render-target .border-orange-200 { border-color: #fed7aa !important; }
-        #pdf-render-target .border-gray-200 { border-color: #e5e7eb !important; }
-        #pdf-render-target .border-gray-300 { border-color: #d1d5db !important; }
-
-        #pdf-render-target .text-blue-600 { color: #2563eb !important; }
-        #pdf-render-target .text-blue-700 { color: #1d4ed8 !important; }
-        #pdf-render-target .text-green-600 { color: #16a34a !important; }
-        #pdf-render-target .text-green-700 { color: #15803d !important; }
-        #pdf-render-target .text-orange-600 { color: #ea580c !important; }
-        #pdf-render-target .text-orange-700 { color: #c2410c !important; }
-        #pdf-render-target .text-gray-500 { color: #6b7280 !important; }
-        #pdf-render-target .text-gray-600 { color: #4b5563 !important; }
-        #pdf-render-target .text-gray-700 { color: #374151 !important; }
-        #pdf-render-target .text-gray-800 { color: #1f2937 !important; }
-        #pdf-render-target .text-gray-900 { color: #111827 !important; }
-      `;
-
-      // Add ID to offscreen element temporarily
-      offscreenRef.current.id = 'pdf-render-target';
-      document.head.appendChild(styleOverride);
-
-      // Wait for styles to apply
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true,
-      });
-
-      // Use jsPDF's html method for better pagination that respects element boundaries
-      await pdf.html(offscreenRef.current, {
-        callback: function (pdf) {
-          // Remove the style override and ID
-          const styleEl = document.getElementById('pdf-color-override');
-          if (styleEl) {
-            document.head.removeChild(styleEl);
-          }
-          if (offscreenRef.current) {
-            offscreenRef.current.id = '';
-          }
-
-          const sanitizedName = building.name
-            .trim()
-            .replace(/[^\w\s\u0980-\u09FF-]/g, ' ')
-            .replace(/\s+/g, '_')
-            .replace(/^_+|_+$/g, '');
-          const fileName = `${sanitizedName}_residents_${
-            new Date().toISOString().split('T')[0]
-          }.pdf`;
-          pdf.save(fileName);
-          setIsGeneratingPDF(false);
-        },
-        x: 10,
-        y: 10,
-        html2canvas: {
-          scale: 0.75,
-          logging: false,
-          useCORS: true,
-          allowTaint: true,
-        },
-        autoPaging: 'text',
-        margin: [10, 10, 10, 10],
-        width: 190,
-      });
+      await generatePDFLib(offscreenRef.current, fileName);
     } catch (error) {
       console.error('Failed to generate PDF:', error);
-
-      // Clean up style override and ID if error occurs
-      const styleEl = document.getElementById('pdf-color-override');
-      if (styleEl) {
-        document.head.removeChild(styleEl);
-      }
-      if (offscreenRef.current) {
-        offscreenRef.current.id = '';
-      }
-
-      setIsGeneratingPDF(false);
       alert(t.pdf?.downloading || 'Failed to generate PDF. Please try again.');
     }
   };
@@ -198,13 +92,13 @@ export default function ResidentsPrint({
   const PDFContent = () => (
     <div className="bg-white p-6 max-w-4xl mx-auto" style={{ width: '794px', pageBreakAfter: 'auto' }}>
       {/* Header */}
-      <div className="text-center mb-4 pb-3 border-b-2 border-gray-300" style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid' }}>
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">
+      <div className="mb-4 pb-3 border-b-2 border-gray-300" style={{ textAlign: 'center', pageBreakAfter: 'avoid', pageBreakInside: 'avoid' }}>
+        <h1 className="text-2xl font-bold text-gray-900 mb-1" style={{ textAlign: 'center' }}>
           {t.building.residentList}
         </h1>
-        <h2 className="text-lg font-semibold text-blue-600 mb-1">{building.name}</h2>
-        <p className="text-sm text-gray-600">{building.address}</p>
-        <p className="text-xs text-gray-500 mt-1">
+        <h2 className="text-lg font-semibold text-blue-600 mb-1" style={{ textAlign: 'center' }}>{building.name}</h2>
+        <p className="text-sm text-gray-600" style={{ textAlign: 'center' }}>{building.address}</p>
+        <p className="text-xs text-gray-500 mt-1" style={{ textAlign: 'center' }}>
           {t.pdf.generatedOn}: {currentDate}
         </p>
       </div>
@@ -350,8 +244,8 @@ export default function ResidentsPrint({
       })}
 
       {/* Footer */}
-      <div className="mt-4 pt-2 border-t border-gray-300 text-center text-xs text-gray-500" style={{ pageBreakBefore: 'auto', pageBreakInside: 'avoid' }}>
-        <p>
+      <div className="mt-4 pt-2 border-t border-gray-300 text-xs text-gray-500" style={{ textAlign: 'center', pageBreakBefore: 'auto', pageBreakInside: 'avoid' }}>
+        <p style={{ textAlign: 'center' }}>
           {t.pdf.generatedBy}{' '}
           <a href={window.location.href} className="text-blue-600 underline">
             {window.location.hostname + window.location.pathname}
@@ -546,9 +440,9 @@ export default function ResidentsPrint({
             </button>
           </div>
 
-          {/* Modal Body - Scrollable Preview with horizontal scroll support */}
+          {/* Modal Body - Scrollable Preview */}
           <div className="flex-1 overflow-auto p-3 sm:p-6 bg-gray-50">
-            <div ref={printRef} className="min-w-min">
+            <div className="min-w-min">
               <PrintContent />
             </div>
           </div>
@@ -573,7 +467,7 @@ export default function ResidentsPrint({
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  <span className="hidden xs:inline">{t.pdf.downloading}</span>
+                  <span className="hidden xs:inline">{progress > 0 ? `${progress}%` : t.pdf.downloading}</span>
                 </>
               ) : (
                 <>

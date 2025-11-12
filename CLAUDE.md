@@ -46,11 +46,27 @@ Located in `src/utils/calculations.ts`:
 - Per-flat total and grand total are both rounded up to nearest integer
 - Currency formatting uses `Intl.NumberFormat` with BDT currency
 
-### PDF Generation System
-The app uses jsPDF + html2canvas for PDF export:
-- **Challenge**: Tailwind CSS v4 uses OKLCH colors which don't render in PDFs
-- **Solution**: Color replacement logic converts OKLCH to RGB before PDF generation
-- Preview component (`BillPreview.tsx`) is rendered to canvas, then converted to PDF
+### PDF Generation System (GoFullPage Approach)
+Custom PDF generator in `src/lib/pdf-generator/` uses the **GoFullPage extension approach**:
+
+**Three-Step Process:**
+1. **Natural Rendering**: Content flows in fixed-width (794px = A4 at 96 DPI), unlimited-height container
+2. **Full Capture**: html2canvas captures ENTIRE content height at once (like full-page screenshot)
+3. **Smart Splitting**: Canvas split into PDF pages at proper page boundaries
+
+**Key Features:**
+- ✅ No content cuts in middle of elements
+- ✅ No blank spaces between pages
+- ✅ Device-independent output (same PDF on all screen sizes)
+- ✅ Multi-page support when needed
+- ✅ Professional quality (scale: 3, quality: 0.95)
+
+**Technical Details:**
+- Located in `src/lib/pdf-generator/core.ts`
+- OKLCH → RGB color conversion for Tailwind CSS v4 compatibility
+- Settings: `margins: [10,10,10,10]`, `imageQuality: 0.95`, `scale: 3`
+- See `src/lib/pdf-generator/HOW-IT-WORKS.md` for full explanation
+- See `src/lib/pdf-generator/CHANGELOG.md` for version history
 
 ### Data Persistence
 - All bill data stored in browser localStorage via `src/utils/storage.ts`
