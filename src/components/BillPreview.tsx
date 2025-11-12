@@ -6,6 +6,7 @@ import type { SupportedLanguage } from '../locales/config';
 import { getTranslations, getLocaleCode, getUIMessages } from '../utils/i18n';
 import { formatNumber } from '../utils/calculations';
 import { numberToWords } from '../utils/numberToWords';
+import { injectPDFStyles } from '../utils/pdf-helpers';
 
 interface BillPreviewProps {
   billData: BillData;
@@ -35,72 +36,8 @@ export default function BillPreview({
   const generateCanvas = async () => {
     if (!offscreenRef.current) return null;
 
-    // Inject CSS to override OKLCH color variables with hex equivalents
-    const styleOverride = document.createElement('style');
-    styleOverride.id = 'pdf-color-override';
-    styleOverride.textContent = `
-      :root, :host, * {
-        --color-red-600: #dc2626 !important;
-        --color-red-700: #b91c1c !important;
-        --color-yellow-50: #fefce8 !important;
-        --color-yellow-100: #fef9c3 !important;
-        --color-yellow-200: #fef08a !important;
-        --color-yellow-300: #fde047 !important;
-        --color-green-50: #f0fdf4 !important;
-        --color-green-100: #dcfce7 !important;
-        --color-green-600: #16a34a !important;
-        --color-green-700: #15803d !important;
-        --color-blue-50: #eff6ff !important;
-        --color-blue-100: #dbeafe !important;
-        --color-blue-200: #bfdbfe !important;
-        --color-blue-300: #93c5fd !important;
-        --color-blue-400: #60a5fa !important;
-        --color-blue-500: #3b82f6 !important;
-        --color-blue-600: #2563eb !important;
-        --color-blue-700: #1d4ed8 !important;
-        --color-purple-50: #faf5ff !important;
-        --color-purple-100: #f3e8ff !important;
-        --color-purple-200: #e9d5ff !important;
-        --color-purple-600: #9333ea !important;
-        --color-gray-50: #f9fafb !important;
-        --color-gray-100: #f3f4f6 !important;
-        --color-gray-200: #e5e7eb !important;
-        --color-gray-300: #d1d5db !important;
-        --color-gray-400: #9ca3af !important;
-        --color-gray-500: #6b7280 !important;
-        --color-gray-600: #4b5563 !important;
-        --color-gray-700: #374151 !important;
-        --color-gray-800: #1f2937 !important;
-        --color-gray-900: #111827 !important;
-        --color-black: #000000 !important;
-        --color-white: #ffffff !important;
-      }
-
-      /* Force specific background colors for print */
-      .bg-blue-50 { background-color: #eff6ff !important; }
-      .bg-blue-100 { background-color: #dbeafe !important; }
-      .bg-blue-200 { background-color: #bfdbfe !important; }
-      .bg-purple-50 { background-color: #faf5ff !important; }
-      .bg-purple-100 { background-color: #f3e8ff !important; }
-      .bg-purple-200 { background-color: #e9d5ff !important; }
-      .bg-green-50 { background-color: #f0fdf4 !important; }
-      .bg-green-100 { background-color: #dcfce7 !important; }
-      .bg-yellow-50 { background-color: #fefce8 !important; }
-      .bg-yellow-100 { background-color: #fef9c3 !important; }
-      .bg-gray-50 { background-color: #f9fafb !important; }
-      .bg-gray-100 { background-color: #f3f4f6 !important; }
-      .bg-gray-200 { background-color: #e5e7eb !important; }
-
-      /* Border colors */
-      .border-blue-200 { border-color: #bfdbfe !important; }
-      .border-blue-300 { border-color: #93c5fd !important; }
-      .border-purple-200 { border-color: #e9d5ff !important; }
-      .border-purple-300 { border-color: #e9d5ff !important; }
-      .border-yellow-200 { border-color: #fef08a !important; }
-      .border-gray-200 { border-color: #e5e7eb !important; }
-      .border-gray-300 { border-color: #d1d5db !important; }
-    `;
-    document.head.appendChild(styleOverride);
+    // Inject CSS to override OKLCH color variables with hex equivalents using shared utility
+    const removeStyles = injectPDFStyles();
 
     // Wait a tick for styles to apply
     await new Promise(resolve => setTimeout(resolve, 100));
@@ -118,7 +55,7 @@ export default function BillPreview({
     });
 
     // Remove the style override
-    document.head.removeChild(styleOverride);
+    removeStyles();
 
     return canvas;
   };

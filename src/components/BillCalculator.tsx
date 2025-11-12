@@ -282,19 +282,11 @@ export default function BillCalculator() {
         setShowHelp(false);
         saveBillData(result.data, formMode);
       } else {
-        alert(
-          language === 'bn'
-            ? `ইমপোর্ট করতে ব্যর্থ: ${result.error}`
-            : `Import failed: ${result.error}`
-        );
+        alert(`${t.errors.importFailed}: ${result.error}`);
       }
     } catch (error) {
       console.error('Failed to import data:', error);
-      alert(
-        language === 'bn'
-          ? 'ফাইল ইমপোর্ট করতে ব্যর্থ। আবার চেষ্টা করুন।'
-          : 'Failed to import file. Please try again.'
-      );
+      alert(t.errors.importFileFailed);
     } finally {
       setIsImporting(false);
       // Reset file input
@@ -422,7 +414,7 @@ export default function BillCalculator() {
               </svg>
             </button>
 
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pr-12">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <img
@@ -439,6 +431,32 @@ export default function BillCalculator() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              {/* Preview Button - Show only if there's data */}
+              {billData.categories.length > 0 && (
+                <button
+                  onClick={() => {
+                    if (formMode === 'calculated') {
+                      if (validateForm()) {
+                        setShowPreview(true);
+                      }
+                    } else {
+                      // Blank mode - only validate title and categories exist
+                      if (billData.title.trim() && billData.categories.length > 0) {
+                        setShowPreview(true);
+                      }
+                    }
+                  }}
+                  className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2"
+                  title={t.actions.preview}
+                >
+                  <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span className="hidden sm:inline">{t.actions.preview}</span>
+                  <span className="sm:hidden">{t.actions.previewShort}</span>
+                </button>
+              )}
               <button
                 onClick={handleToggleHelp}
                 className={`px-3 sm:px-4 py-2 rounded-lg transition-all font-medium text-sm sm:text-base flex items-center gap-2 ${
@@ -1007,15 +1025,16 @@ export default function BillCalculator() {
         )}
 
         {/* Actions */}
-        <div className="flex flex-wrap gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
           <button
             onClick={() => setShowClearConfirm(true)}
-            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            {t.actions.clearAll}
+            <span className="hidden xs:inline">{t.actions.clearAll}</span>
+            <span className="xs:hidden">{t.actions.clearShort}</span>
           </button>
           <button
             onClick={() => {
@@ -1031,13 +1050,14 @@ export default function BillCalculator() {
               }
             }}
             disabled={billData.categories.length === 0}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            {t.actions.preview}
+            <span className="hidden xs:inline">{t.actions.preview}</span>
+            <span className="xs:hidden">{t.actions.previewShort}</span>
           </button>
         </div>
       </main>

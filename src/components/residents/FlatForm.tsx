@@ -120,7 +120,7 @@ export default function FlatForm({ language, flat, preselectedFloor, onSuccess, 
                 <p className="mt-1 text-sm text-red-600">{errors.floorNumber}</p>
               )}
               {preselectedFloor && !isEditing ? (
-                <p className="mt-1 text-sm text-blue-600">{language === 'bn' ? 'এই তলার জন্য স্বয়ংক্রিয়ভাবে নির্বাচিত' : 'Auto-selected for this floor'}</p>
+                <p className="mt-1 text-sm text-blue-600">{t.flat.floorNumberAutoSelected}</p>
               ) : (
                 <p className="mt-1 text-sm text-gray-500">{t.flat.floorNumberHelp}</p>
               )}

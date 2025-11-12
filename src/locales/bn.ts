@@ -86,15 +86,22 @@ export const bn = {
   },
   actions: {
     loadExample: 'উদাহরণ লোড করুন',
+    loadExampleShort: 'উদাহরণ', // Mobile short version
     clearAll: 'সব মুছুন',
+    clearShort: 'মুছুন', // Mobile short version
     preview: 'প্রিভিউ',
+    previewShort: 'প্রিভিউ', // Mobile short version
     share: 'শেয়ার',
     download: 'পিডিএফ ডাউনলোড',
+    downloadShort: 'পিডিএফ', // Mobile short version
     downloadImage: 'ছবি ডাউনলোড',
     export: 'ডেটা এক্সপোর্ট',
     import: 'ডেটা ইমপোর্ট',
+    importShort: 'ইমপোর্ট করুন', // Short version
     exporting: 'এক্সপোর্ট হচ্ছে...',
     importing: 'ইমপোর্ট হচ্ছে...',
+    guide: 'গাইড',
+    howToUse: 'কিভাবে ব্যবহার করবেন',
   },
   preview: {
     title: 'বিল প্রিভিউ',
@@ -131,6 +138,14 @@ export const bn = {
     blankStep3: '৩. ফাঁকা ফর্মে ম্যানুয়ালি পরিমাণ পূরণ করার জন্য স্থান থাকবে',
     blankStep4: '৪. প্রিভিউ দেখুন এবং ফাঁকা ফর্মটি মুদ্রণ ও বিতরণের জন্য ডাউনলোড করুন',
     tryExample: 'এটি কীভাবে কাজ করে তা দেখতে উদাহরণ ডেটা লোড করে দেখুন!',
+    residentsStep1: 'বিল্ডিং তথ্য কার্ডে বিল্ডিংয়ের বিস্তারিত দেখুন এবং প্রয়োজনে সম্পাদনা করুন।',
+    residentsStep2: 'প্রতিটি ফ্ল্যাটের জন্য বাসিন্দাদের যোগ করুন, সম্পাদনা করুন বা মুছে ফেলুন।',
+    residentsStep3: '"এক্সপোর্ট ডেটা" ব্যবহার করে আপনার ডেটা JSON ফাইল হিসেবে সংরক্ষণ করুন।',
+    residentsStep4: '"প্রিন্ট" বাটন ব্যবহার করে সমস্ত বাসিন্দার তালিকা প্রিন্ট বা ডাউনলোড করুন।',
+    setupStep1: 'আপনার বিল্ডিংয়ের নাম, ঠিকানা এবং মোট তলা সংখ্যা দিয়ে শুরু করুন।',
+    setupStep2: 'তারপর প্রতিটি ফ্ল্যাটের জন্য বাসিন্দাদের তথ্য যোগ করুন।',
+    setupStep3: 'ডেটা এক্সপোর্ট করে JSON ফাইল হিসেবে সংরক্ষণ করুন এবং পরে ইমপোর্ট করতে পারবেন।',
+    setupStep4: 'দ্রুত শুরু করতে "উদাহরণ ডেটা লোড করুন" ক্লিক করুন।',
   },
   navigation: {
     appTitle: 'বিল্ডিং ম্যানেজমেন্ট',
@@ -170,6 +185,7 @@ export const bn = {
     floorNumber: 'তলা নম্বর',
     floorNumberPlaceholder: 'উদাহরণ: ১, ২, G',
     floorNumberHelp: 'তলা নম্বর (গ্রাউন্ড ফ্লোরের জন্য G ব্যবহার করুন)',
+    floorNumberAutoSelected: 'এই তলার জন্য স্বয়ংক্রিয়ভাবে নির্বাচিত',
     flatNumber: 'ফ্ল্যাট নম্বর',
     flatNumberPlaceholder: 'উদাহরণ: ১A, ১০১',
     flatNumberHelp: 'অনন্য ফ্ল্যাট শনাক্তকারী',
@@ -235,7 +251,6 @@ export const bn = {
   },
   pdf: {
     generatedOn: 'তৈরির তারিখ',
-    generatedBy: 'তৈরি করেছেন',
     downloading: 'PDF তৈরি হচ্ছে...',
     phone: 'ফোন',
     email: 'ইমেইল',
@@ -244,5 +259,13 @@ export const bn = {
     noResidents: 'কোনো বাসিন্দা নেই (খালি)',
     flats: 'ফ্ল্যাট',
     flat: 'ফ্ল্যাট',
+  },
+  errors: {
+    loadExampleFailed: 'উদাহরণ ডেটা লোড করতে ব্যর্থ। আবার চেষ্টা করুন।',
+    importFailed: 'ইমপোর্ট করতে ব্যর্থ',
+    importFileFailed: 'ফাইল ইমপোর্ট করতে ব্যর্থ। আবার চেষ্টা করুন।',
+  },
+  numbers: {
+    negative: 'ঋণাত্মক',
   },
 };

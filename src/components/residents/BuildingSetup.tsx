@@ -77,7 +77,7 @@ export default function BuildingSetup({ language, onSetupComplete }: BuildingSet
       onSetupComplete();
     } catch (error) {
       console.error('Failed to load example data:', error);
-      alert(language === 'bn' ? 'উদাহরণ ডেটা লোড করতে ব্যর্থ। আবার চেষ্টা করুন।' : 'Failed to load example data. Please try again.');
+      alert(t.errors.loadExampleFailed);
     }
   };
 
@@ -97,17 +97,11 @@ export default function BuildingSetup({ language, onSetupComplete }: BuildingSet
         saveBuilding(result.data);
         onSetupComplete();
       } else {
-        alert(
-          `${language === 'bn' ? 'ইমপোর্ট করতে ব্যর্থ' : 'Import failed'}: ${result.error}`
-        );
+        alert(`${t.errors.importFailed}: ${result.error}`);
       }
     } catch (error) {
       console.error('Failed to import data:', error);
-      alert(
-        language === 'bn'
-          ? 'ফাইল ইমপোর্ট করতে ব্যর্থ। আবার চেষ্টা করুন।'
-          : 'Failed to import file. Please try again.'
-      );
+      alert(t.errors.importFileFailed);
     } finally {
       setIsImporting(false);
       // Reset file input
@@ -154,7 +148,7 @@ export default function BuildingSetup({ language, onSetupComplete }: BuildingSet
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>
-                {language === 'bn' ? 'গাইড' : 'Guide'}
+                {t.actions.guide}
               </span>
             </button>
             <button
@@ -166,7 +160,7 @@ export default function BuildingSetup({ language, onSetupComplete }: BuildingSet
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               <span className="hidden sm:inline">{t.building.loadExampleData}</span>
-              <span className="sm:hidden">{language === 'bn' ? 'উদাহরণ' : 'Example'}</span>
+              <span className="sm:hidden">{t.actions.loadExampleShort}</span>
             </button>
             <input
               ref={fileInputRef}
@@ -179,12 +173,12 @@ export default function BuildingSetup({ language, onSetupComplete }: BuildingSet
               onClick={handleImportClick}
               disabled={isImporting}
               className="p-2 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              title={language === 'bn' ? 'ইমপোর্ট করুন' : 'Import Data'}
+              title={t.actions.import}
             >
               <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
-              <span className="hidden sm:inline">{isImporting ? t.actions.importing : (language === 'bn' ? 'ইমপোর্ট করুন' : 'Import Data')}</span>
+              <span className="hidden sm:inline">{isImporting ? t.actions.importing : t.actions.import}</span>
             </button>
           </div>
         </div>
@@ -205,24 +199,24 @@ export default function BuildingSetup({ language, onSetupComplete }: BuildingSet
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              {language === 'bn' ? 'কিভাবে ব্যবহার করবেন' : 'How to Use'}
+              {t.actions.howToUse}
             </h3>
             <div className="space-y-3 text-sm text-purple-800">
               <div className="flex items-start gap-2">
                 <span className="font-bold text-purple-600">1.</span>
-                <p>{language === 'bn' ? 'আপনার বিল্ডিংয়ের নাম, ঠিকানা এবং মোট তলা সংখ্যা দিয়ে শুরু করুন।' : 'Start by entering your building\'s name, address, and total number of floors.'}</p>
+                <p>{t.help.setupStep1}</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-bold text-purple-600">2.</span>
-                <p>{language === 'bn' ? 'তারপর প্রতিটি ফ্ল্যাটের জন্য বাসিন্দাদের তথ্য যোগ করুন।' : 'Then add resident information for each flat in your building.'}</p>
+                <p>{t.help.setupStep2}</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-bold text-purple-600">3.</span>
-                <p>{language === 'bn' ? 'ডেটা এক্সপোর্ট করে JSON ফাইল হিসেবে সংরক্ষণ করুন এবং পরে ইমপোর্ট করতে পারবেন।' : 'Export your data as a JSON file and import it later when needed.'}</p>
+                <p>{t.help.setupStep3}</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-bold text-purple-600">4.</span>
-                <p>{language === 'bn' ? 'দ্রুত শুরু করতে "উদাহরণ ডেটা লোড করুন" ক্লিক করুন।' : 'Click "Load Example Data" to quickly get started with sample information.'}</p>
+                <p>{t.help.setupStep4}</p>
               </div>
             </div>
           </div>

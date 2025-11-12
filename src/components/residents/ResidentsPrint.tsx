@@ -1,8 +1,9 @@
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import type { Building, Flat } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
-import { getTranslations, getLocaleCode } from '../../utils/i18n';
+import { getTranslations, getLocaleCode, getUIMessages } from '../../utils/i18n';
 import { usePDFGeneratorManual } from '../../lib/pdf-generator/hooks';
+import { DEFAULT_PDF_OPTIONS } from '../../utils/pdf-helpers';
 
 interface ResidentsPrintProps {
   building: Building;
@@ -16,6 +17,7 @@ export default function ResidentsPrint({
   onClose,
 }: ResidentsPrintProps) {
   const t = getTranslations(language);
+  const uiMsgs = getUIMessages(language);
   const offscreenRef = useRef<HTMLDivElement>(null);
   const currentDate = new Date().toLocaleString(getLocaleCode(language), {
     year: 'numeric',
@@ -25,20 +27,12 @@ export default function ResidentsPrint({
     minute: '2-digit',
   });
 
-  // Use the new PDF generator library with optimized settings
+  // Use shared PDF generator settings
   const {
     generatePDF: generatePDFLib,
     isGenerating: isGeneratingPDF,
     progress,
-  } = usePDFGeneratorManual({
-    format: 'a4',
-    orientation: 'portrait',
-    margins: [10, 10, 10, 10],
-    compress: true,
-    showPageNumbers: false,
-    imageQuality: 0.95, // Higher quality for better text rendering
-    scale: 3, // Higher scale for crisp text
-  });
+  } = usePDFGeneratorManual(DEFAULT_PDF_OPTIONS);
 
   const handleDownloadPDF = async () => {
     if (!offscreenRef.current) {
@@ -92,15 +86,17 @@ export default function ResidentsPrint({
   const PDFContent = () => (
     <div className="bg-white p-6 max-w-4xl mx-auto" style={{ width: '794px', pageBreakAfter: 'auto' }}>
       {/* Header */}
-      <div className="mb-4 pb-3 border-b-2 border-gray-300" style={{ textAlign: 'center', pageBreakAfter: 'avoid', pageBreakInside: 'avoid' }}>
-        <h1 className="text-2xl font-bold text-gray-900 mb-1" style={{ textAlign: 'center' }}>
-          {t.building.residentList}
-        </h1>
-        <h2 className="text-lg font-semibold text-blue-600 mb-1" style={{ textAlign: 'center' }}>{building.name}</h2>
-        <p className="text-sm text-gray-600" style={{ textAlign: 'center' }}>{building.address}</p>
-        <p className="text-xs text-gray-500 mt-1" style={{ textAlign: 'center' }}>
-          {t.pdf.generatedOn}: {currentDate}
-        </p>
+      <div className="mb-4 pb-3 border-b-2 border-gray-300" style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid', textAlign: 'center' }}>
+        <div style={{ display: 'inline-block', textAlign: 'center', width: '100%' }}>
+          <h1 className="text-2xl font-bold text-gray-900 mb-1">
+            {t.building.residentList}
+          </h1>
+          <h2 className="text-lg font-semibold text-blue-600 mb-1">{building.name}</h2>
+          <p className="text-sm text-gray-600">{building.address}</p>
+          <p className="text-xs text-gray-500 mt-1">
+            {t.pdf.generatedOn}: {currentDate}
+          </p>
+        </div>
       </div>
 
       {/* Statistics Summary */}
@@ -244,9 +240,9 @@ export default function ResidentsPrint({
       })}
 
       {/* Footer */}
-      <div className="mt-4 pt-2 border-t border-gray-300 text-xs text-gray-500" style={{ textAlign: 'center', pageBreakBefore: 'auto', pageBreakInside: 'avoid' }}>
+      <div className="mt-4 pt-2 border-t border-gray-300 text-xs text-gray-500" style={{ pageBreakBefore: 'auto', pageBreakInside: 'avoid' }}>
         <p style={{ textAlign: 'center' }}>
-          {t.pdf.generatedBy}{' '}
+          {uiMsgs.generatedFrom}:{' '}
           <a href={window.location.href} className="text-blue-600 underline">
             {window.location.hostname + window.location.pathname}
           </a>
@@ -412,8 +408,10 @@ export default function ResidentsPrint({
       {/* Footer */}
       <div className="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-gray-300 text-center text-xs sm:text-sm text-gray-500">
         <p className="break-words">
-          {t.pdf.generatedBy}{' '}
-          <span className="font-semibold">{t.navigation.appTitle}</span>
+          {uiMsgs.generatedFrom}:{' '}
+          <a href={window.location.href} className="text-blue-600 underline">
+            {window.location.hostname + window.location.pathname}
+          </a>
         </p>
       </div>
     </div>
@@ -475,7 +473,7 @@ export default function ResidentsPrint({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
                   <span className="hidden xs:inline">{t.actions.download}</span>
-                  <span className="xs:hidden">PDF</span>
+                  <span className="xs:hidden">{t.actions.downloadShort}</span>
                 </>
               )}
             </button>

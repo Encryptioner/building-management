@@ -64,7 +64,7 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
       loadBuildingData();
     } catch (error) {
       console.error('Failed to load example data:', error);
-      alert(language === 'bn' ? 'উদাহরণ ডেটা লোড করতে ব্যর্থ। আবার চেষ্টা করুন।' : 'Failed to load example data. Please try again.');
+      alert(t.errors.loadExampleFailed);
     }
   };
 
@@ -84,17 +84,11 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
         saveBuilding(result.data);
         loadBuildingData();
       } else {
-        alert(
-          `${language === 'bn' ? 'ইমপোর্ট করতে ব্যর্থ' : 'Import failed'}: ${result.error}`
-        );
+        alert(`${t.errors.importFailed}: ${result.error}`);
       }
     } catch (error) {
       console.error('Failed to import data:', error);
-      alert(
-        language === 'bn'
-          ? 'ফাইল ইমপোর্ট করতে ব্যর্থ। আবার চেষ্টা করুন।'
-          : 'Failed to import file. Please try again.'
-      );
+      alert(t.errors.importFileFailed);
     } finally {
       setIsImporting(false);
       // Reset file input
@@ -143,6 +137,21 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
 
           {/* Quick Actions in Header */}
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+            {/* Preview Button - Show only if there's data */}
+            {building && building.flats && building.flats.length > 0 && (
+              <button
+                onClick={() => setShowPrint(true)}
+                className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2"
+                title={t.actions.preview}
+              >
+                <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                </svg>
+                <span className="hidden sm:inline">{t.actions.preview}</span>
+                <span className="sm:hidden">{t.actions.previewShort}</span>
+              </button>
+            )}
             <button
               onClick={() => setShowGuide(!showGuide)}
               className={`px-3 sm:px-4 py-2 rounded-lg transition-all font-medium text-sm sm:text-base flex items-center gap-2 ${
@@ -155,7 +164,7 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <span>
-                {language === 'bn' ? 'গাইড' : 'Guide'}
+                {t.actions.guide}
               </span>
             </button>
             <button
@@ -167,7 +176,7 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               <span className="hidden sm:inline">{t.building.loadExampleData}</span>
-              <span className="sm:hidden">{language === 'bn' ? 'উদাহরণ' : 'Example'}</span>
+              <span className="sm:hidden">{t.actions.loadExampleShort}</span>
             </button>
             <input
               ref={fileInputRef}
@@ -180,12 +189,12 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
               onClick={handleImportClick}
               disabled={isImporting}
               className="p-2 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              title={language === 'bn' ? 'ইমপোর্ট করুন' : 'Import Data'}
+              title={t.actions.import}
             >
               <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
-              <span className="hidden sm:inline">{isImporting ? t.actions.importing : (language === 'bn' ? 'ইমপোর্ট করুন' : 'Import Data')}</span>
+              <span className="hidden sm:inline">{isImporting ? t.actions.importing : t.actions.import}</span>
             </button>
             <button
               onClick={handleExport}
@@ -216,24 +225,24 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
-              {language === 'bn' ? 'কিভাবে ব্যবহার করবেন' : 'How to Use'}
+              {t.actions.howToUse}
             </h3>
             <div className="space-y-3 text-sm text-purple-800">
               <div className="flex items-start gap-2">
                 <span className="font-bold text-purple-600">1.</span>
-                <p>{language === 'bn' ? 'বিল্ডিং তথ্য কার্ডে বিল্ডিংয়ের বিস্তারিত দেখুন এবং প্রয়োজনে সম্পাদনা করুন।' : 'View and edit your building details in the Building Info card.'}</p>
+                <p>{t.help.residentsStep1}</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-bold text-purple-600">2.</span>
-                <p>{language === 'bn' ? 'প্রতিটি ফ্ল্যাটের জন্য বাসিন্দাদের যোগ করুন, সম্পাদনা করুন বা মুছে ফেলুন।' : 'Add, edit, or remove residents for each flat in your building.'}</p>
+                <p>{t.help.residentsStep2}</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-bold text-purple-600">3.</span>
-                <p>{language === 'bn' ? '"এক্সপোর্ট ডেটা" ব্যবহার করে আপনার ডেটা JSON ফাইল হিসেবে সংরক্ষণ করুন।' : 'Use "Export Data" to save your information as a JSON file for backup.'}</p>
+                <p>{t.help.residentsStep3}</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="font-bold text-purple-600">4.</span>
-                <p>{language === 'bn' ? '"প্রিন্ট" বাটন ব্যবহার করে সমস্ত বাসিন্দার তালিকা প্রিন্ট বা ডাউনলোড করুন।' : 'Click "Print" to generate a printable list of all residents.'}</p>
+                <p>{t.help.residentsStep4}</p>
               </div>
             </div>
           </div>
@@ -248,30 +257,34 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
         <FlatList language={language} onUpdate={handleUpdate} />
       </div>
 
-      {/* Bottom Action Buttons */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-8">
-        <div className="flex justify-center gap-4">
-          <button
-            onClick={() => setShowClearConfirm(true)}
-            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            {t.actions.clearAll}
-          </button>
-          <button
-            onClick={() => setShowPrint(true)}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-            </svg>
-            {t.actions.preview}
-          </button>
+      {/* Bottom Action Buttons - Show only if there's data */}
+      {building && building.flats && building.flats.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 mb-8">
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4">
+            <button
+              onClick={() => setShowClearConfirm(true)}
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span className="hidden xs:inline">{t.actions.clearAll}</span>
+              <span className="xs:hidden">{t.actions.clearShort}</span>
+            </button>
+            <button
+              onClick={() => setShowPrint(true)}
+              className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
+            >
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+              <span className="hidden xs:inline">{t.actions.preview}</span>
+              <span className="xs:hidden">{t.actions.previewShort}</span>
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Print Modal */}
       {showPrint && (
