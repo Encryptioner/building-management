@@ -82,48 +82,46 @@ export default function ResidentsPrint({
   const occupiedFlats = building.flats.filter(f => f.residents.length > 0).length;
   const vacantFlats = totalFlats - occupiedFlats;
 
-  // Separate component for PDF rendering with fixed styling (no responsive classes)
+  // Separate component for PDF rendering with inline hex styles (to avoid OKLCH color parsing issues)
   const PDFContent = () => (
-    <div className="bg-white p-6 max-w-4xl mx-auto" style={{ width: '794px', pageBreakAfter: 'auto' }}>
+    <div className="p-6 max-w-4xl mx-auto" style={{ width: '794px', pageBreakAfter: 'auto', backgroundColor: '#ffffff' }}>
       {/* Header */}
-      <div className="mb-4 pb-3 border-b-2 border-gray-300" style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid', textAlign: 'center' }}>
-        <div style={{ display: 'inline-block', textAlign: 'center', width: '100%' }}>
-          <h1 className="text-2xl font-bold text-gray-900 mb-1">
-            {t.building.residentList}
-          </h1>
-          <h2 className="text-lg font-semibold text-blue-600 mb-1">{building.name}</h2>
-          <p className="text-sm text-gray-600">{building.address}</p>
-          <p className="text-xs text-gray-500 mt-1">
-            {t.pdf.generatedOn}: {currentDate}
-          </p>
-        </div>
+      <div className="text-center mb-4 pb-3 border-b-2" style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid', borderColor: '#d1d5db' }}>
+        <h1 className="text-2xl font-bold mb-1" style={{ color: '#111827' }}>
+          {t.building.residentList}
+        </h1>
+        <h2 className="text-lg font-semibold mb-1" style={{ color: '#2563eb' }}>{building.name}</h2>
+        <p className="text-sm" style={{ color: '#4b5563' }}>{building.address}</p>
+        <p className="text-xs mt-1" style={{ color: '#6b7280' }}>
+          {t.pdf.generatedOn}: {currentDate}
+        </p>
       </div>
 
       {/* Statistics Summary */}
-      <div className="grid grid-cols-2 gap-3 mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg" style={{ pageBreakInside: 'avoid', pageBreakAfter: 'avoid' }}>
+      <div className="grid grid-cols-2 gap-3 mb-4 p-3 border rounded-lg" style={{ pageBreakInside: 'avoid', pageBreakAfter: 'avoid', backgroundColor: '#eff6ff', borderColor: '#bfdbfe' }}>
         <div>
-          <p className="text-sm text-gray-600">{t.stats.totalFlats}</p>
-          <p className="text-2xl font-bold text-blue-600">{totalFlats}</p>
+          <p className="text-sm" style={{ color: '#4b5563' }}>{t.stats.totalFlats}</p>
+          <p className="text-2xl font-bold" style={{ color: '#2563eb' }}>{totalFlats}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-600">{t.stats.totalResidents}</p>
-          <p className="text-2xl font-bold text-blue-600">{totalResidents}</p>
+          <p className="text-sm" style={{ color: '#4b5563' }}>{t.stats.totalResidents}</p>
+          <p className="text-2xl font-bold" style={{ color: '#2563eb' }}>{totalResidents}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-600">{t.flat.owned}</p>
-          <p className="text-xl font-semibold text-green-600">{ownedFlats}</p>
+          <p className="text-sm" style={{ color: '#4b5563' }}>{t.flat.owned}</p>
+          <p className="text-xl font-semibold" style={{ color: '#16a34a' }}>{ownedFlats}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-600">{t.flat.rented}</p>
-          <p className="text-xl font-semibold text-orange-600">{rentedFlats}</p>
+          <p className="text-sm" style={{ color: '#4b5563' }}>{t.flat.rented}</p>
+          <p className="text-xl font-semibold" style={{ color: '#ea580c' }}>{rentedFlats}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-600">{t.stats.occupied}</p>
-          <p className="text-xl font-semibold text-gray-700">{occupiedFlats}</p>
+          <p className="text-sm" style={{ color: '#4b5563' }}>{t.stats.occupied}</p>
+          <p className="text-xl font-semibold" style={{ color: '#374151' }}>{occupiedFlats}</p>
         </div>
         <div>
-          <p className="text-sm text-gray-600">{t.stats.vacant}</p>
-          <p className="text-xl font-semibold text-gray-700">{vacantFlats}</p>
+          <p className="text-sm" style={{ color: '#4b5563' }}>{t.stats.vacant}</p>
+          <p className="text-xl font-semibold" style={{ color: '#374151' }}>{vacantFlats}</p>
         </div>
       </div>
 
@@ -137,46 +135,48 @@ export default function ResidentsPrint({
         return (
           <div key={floor} className="mb-3" style={{ pageBreakBefore: 'auto', pageBreakInside: 'avoid' }}>
             {/* Floor Header */}
-            <div className="bg-gray-100 px-3 py-1 rounded-t-lg border-b-2 border-gray-300" style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid' }}>
-              <h3 className="text-base font-bold text-gray-900">{floorLabel}</h3>
-              <p className="text-xs text-gray-600">
+            <div className="px-3 py-1 rounded-t-lg border-b-2" style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid', backgroundColor: '#f3f4f6', borderColor: '#d1d5db' }}>
+              <h3 className="text-base font-bold" style={{ color: '#111827' }}>{floorLabel}</h3>
+              <p className="text-xs" style={{ color: '#4b5563' }}>
                 {flats.length} {flats.length === 1 ? t.pdf.flat : t.pdf.flats}
               </p>
             </div>
 
             {/* Flats */}
-            <div className="border border-gray-300 border-t-0 rounded-b-lg overflow-hidden">
+            <div className="border border-t-0 rounded-b-lg overflow-hidden" style={{ borderColor: '#d1d5db' }}>
               {flats.map((flat, idx) => (
                 <div
                   key={flat.id}
-                  className={`p-2 ${idx > 0 ? 'border-t border-gray-200' : ''} ${
-                    flat.residents.length === 0 ? 'bg-gray-50' : ''
-                  }`}
-                  style={{ pageBreakInside: 'avoid' }}
+                  className="p-2"
+                  style={{
+                    pageBreakInside: 'avoid',
+                    backgroundColor: flat.residents.length === 0 ? '#f9fafb' : 'transparent',
+                    borderTop: idx > 0 ? '1px solid #e5e7eb' : 'none'
+                  }}
                 >
                   {/* Flat Header */}
                   <div className="flex items-start justify-between mb-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-base font-bold text-gray-900">{flat.flatNumber}</span>
+                      <span className="text-base font-bold" style={{ color: '#111827' }}>{flat.flatNumber}</span>
                       <span
-                        className={`text-xs px-1 py-0.5 rounded ${
-                          flat.ownershipType === 'owned'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-orange-100 text-orange-700'
-                        }`}
+                        className="text-xs px-1 py-0.5 rounded"
+                        style={{
+                          backgroundColor: flat.ownershipType === 'owned' ? '#dcfce7' : '#ffedd5',
+                          color: flat.ownershipType === 'owned' ? '#15803d' : '#c2410c'
+                        }}
                       >
                         {flat.ownershipType === 'owned' ? t.flat.owned : t.flat.rented}
                       </span>
                     </div>
-                    <div className="text-right text-xs text-gray-600">
+                    <div className="text-right text-xs" style={{ color: '#4b5563' }}>
                       {flat.motorcycleParkingCount > 0 && (
                         <span className="mr-3">
-                          🏍️ {flat.motorcycleParkingCount}
+                          M: {flat.motorcycleParkingCount}
                         </span>
                       )}
                       {flat.carParkingCount > 0 && (
                         <span>
-                          🚗 {flat.carParkingCount}
+                          C: {flat.carParkingCount}
                         </span>
                       )}
                     </div>
@@ -184,15 +184,15 @@ export default function ResidentsPrint({
 
                   {/* Residents */}
                   {flat.residents.length === 0 ? (
-                    <p className="text-xs text-gray-500 italic">
+                    <p className="text-xs italic" style={{ color: '#6b7280' }}>
                       {t.pdf.noResidents}
                     </p>
                   ) : (
                     <div className="space-y-1">
                       {flat.residents.map((resident) => (
-                        <div key={resident.id} className="bg-gray-50 p-2 rounded border border-gray-200" style={{ pageBreakInside: 'avoid' }}>
-                          <p className="font-semibold text-sm text-gray-900">{resident.name}</p>
-                          <div className="grid grid-cols-2 gap-1 mt-0.5 text-xs text-gray-600">
+                        <div key={resident.id} className="p-2 rounded border" style={{ pageBreakInside: 'avoid', backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
+                          <p className="font-semibold text-sm" style={{ color: '#111827' }}>{resident.name}</p>
+                          <div className="grid grid-cols-2 gap-1 mt-0.5 text-xs" style={{ color: '#4b5563' }}>
                             {resident.phone && (
                               <div>
                                 <span className="font-medium">{t.pdf.phone}:</span>{' '}
@@ -219,7 +219,7 @@ export default function ResidentsPrint({
                             )}
                           </div>
                           {resident.notes && (
-                            <p className="text-xs text-gray-600 mt-0.5 italic">{resident.notes}</p>
+                            <p className="text-xs mt-0.5 italic" style={{ color: '#4b5563' }}>{resident.notes}</p>
                           )}
                         </div>
                       ))}
@@ -228,7 +228,7 @@ export default function ResidentsPrint({
 
                   {/* Flat Notes */}
                   {flat.notes && (
-                    <p className="text-xs text-gray-600 mt-1 italic border-t border-gray-200 pt-1">
+                    <p className="text-xs mt-1 italic border-t pt-1" style={{ color: '#4b5563', borderColor: '#e5e7eb' }}>
                       {flat.notes}
                     </p>
                   )}
@@ -240,10 +240,10 @@ export default function ResidentsPrint({
       })}
 
       {/* Footer */}
-      <div className="mt-4 pt-2 border-t border-gray-300 text-xs text-gray-500" style={{ pageBreakBefore: 'auto', pageBreakInside: 'avoid' }}>
-        <p style={{ textAlign: 'center' }}>
+      <div className="mt-4 pt-2 border-t text-center text-xs" style={{ pageBreakBefore: 'auto', pageBreakInside: 'avoid', borderColor: '#d1d5db', color: '#6b7280' }}>
+        <p>
           {uiMsgs.generatedFrom}:{' '}
-          <a href={window.location.href} className="text-blue-600 underline">
+          <a href={window.location.href} className="underline" style={{ color: '#2563eb' }}>
             {window.location.hostname + window.location.pathname}
           </a>
         </p>
@@ -337,12 +337,12 @@ export default function ResidentsPrint({
                     <div className="text-right text-xs sm:text-sm text-gray-600 flex-shrink-0">
                       {flat.motorcycleParkingCount > 0 && (
                         <span className="mr-2 sm:mr-3 whitespace-nowrap">
-                          🏍️ {flat.motorcycleParkingCount}
+                          M: {flat.motorcycleParkingCount}
                         </span>
                       )}
                       {flat.carParkingCount > 0 && (
                         <span className="whitespace-nowrap">
-                          🚗 {flat.carParkingCount}
+                          C: {flat.carParkingCount}
                         </span>
                       )}
                     </div>
