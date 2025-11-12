@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { BillData, ServiceCategory } from '../types';
 import type { SupportedLanguage } from '../locales/config';
-import { isLanguageSupported } from '../locales/config';
 import { calculateBillSummary, formatNumber } from '../utils/calculations';
 import { saveBillData, loadBillData, clearBillData } from '../utils/storage';
 import { getExampleData } from '../utils/exampleData';
@@ -33,18 +32,16 @@ const getEmptyBillData = (): BillData => ({
   showCarInBlankForm: true, // Default to showing car spaces in blank form
 });
 
-export default function BillCalculator() {
-  // Load language from localStorage or default to 'bn' (Bangla)
-  const [language, setLanguage] = useState<SupportedLanguage>('bn');
+interface BillCalculatorProps {
+  language: SupportedLanguage;
+}
+
+export default function BillCalculator({ language }: BillCalculatorProps) {
   const [isClient, setIsClient] = useState(false);
 
-  // Initialize language and form mode on client side only
+  // Initialize form mode on client side only
   useEffect(() => {
     setIsClient(true);
-    const savedLang = localStorage.getItem('preferred-language');
-    if (savedLang && isLanguageSupported(savedLang)) {
-      setLanguage(savedLang);
-    }
 
     const savedMode = localStorage.getItem('preferred-form-mode');
     if (savedMode === 'blank' || savedMode === 'calculated') {
@@ -129,11 +126,6 @@ export default function BillCalculator() {
       return () => clearTimeout(timeoutId);
     }
   }, [billData, formMode]);
-
-  // Save language preference to localStorage
-  useEffect(() => {
-    localStorage.setItem('preferred-language', language);
-  }, [language]);
 
   // Save form mode preference to localStorage
   useEffect(() => {

@@ -7,7 +7,7 @@ export default function App() {
     <Navigation>
       {(activeTab, language) => {
         if (activeTab === 'bills') {
-          return <BillCalculator />;
+          return <BillCalculator language={language} />;
         } else {
           return <ResidentsManager language={language} />;
         }
