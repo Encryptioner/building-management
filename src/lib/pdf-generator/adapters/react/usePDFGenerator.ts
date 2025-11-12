@@ -5,8 +5,8 @@
  */
 
 import { useRef, useState, useCallback } from 'react';
-import { PDFGenerator } from './core';
-import type { PDFGeneratorOptions, PDFGenerationResult } from './types';
+import { PDFGenerator } from '../../core';
+import type { PDFGeneratorOptions, PDFGenerationResult } from '../../types';
 
 export interface UsePDFGeneratorOptions extends Partial<PDFGeneratorOptions> {
   /** Filename for the generated PDF */

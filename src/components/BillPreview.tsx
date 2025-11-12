@@ -608,8 +608,11 @@ export default function BillPreview({
             <div className="mt-8 pt-6 border-t border-gray-300 text-center text-xs text-gray-500">
               <p>
                 {uiMsgs.generatedFrom}:{' '}
-                <a href={window.location.href} className="text-blue-600 underline">
-                  {window.location.hostname + window.location.pathname}
+                <a 
+                  href={window.location.href} 
+                  className="text-blue-600 underline"
+                >
+                  {window.location.href}
                 </a>
               </p>
             </div>

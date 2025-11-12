@@ -251,3 +251,24 @@ export const FAST_PDF_OPTIONS = {
   imageQuality: 0.85,
   scale: 2,
 };
+
+/**
+ * Calculate PDF content width in pixels
+ * This ensures consistent width across all PDF-rendered components
+ *
+ * Formula: (Paper Width - Left Margin - Right Margin) × MM_TO_PX
+ * For A4 Portrait with 10mm margins: (210 - 10 - 10) × 3.7795 = 718.105px
+ */
+export function getPDFContentWidth(): number {
+  const a4WidthMm = 210; // A4 paper width
+  const [, marginRight, , marginLeft] = DEFAULT_PDF_OPTIONS.margins;
+  const usableWidthMm = a4WidthMm - marginLeft - marginRight;
+  const MM_TO_PX = 3.7795275591; // Exact 96 DPI conversion
+  return Math.round(usableWidthMm * MM_TO_PX); // 718px
+}
+
+/**
+ * PDF content width constant for consistent rendering
+ * Use this value for all PDF-targeted content widths
+ */
+export const PDF_CONTENT_WIDTH_PX = getPDFContentWidth();

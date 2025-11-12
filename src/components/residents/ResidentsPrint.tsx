@@ -3,7 +3,7 @@ import type { Building, Flat } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
 import { getTranslations, getLocaleCode, getUIMessages } from '../../utils/i18n';
 import { usePDFGeneratorManual } from '../../lib/pdf-generator/hooks';
-import { DEFAULT_PDF_OPTIONS } from '../../utils/pdf-helpers';
+import { DEFAULT_PDF_OPTIONS, PDF_CONTENT_WIDTH_PX } from '../../utils/pdf-helpers';
 
 interface ResidentsPrintProps {
   building: Building;
@@ -82,46 +82,46 @@ export default function ResidentsPrint({
   const occupiedFlats = building.flats.filter(f => f.residents.length > 0).length;
   const vacantFlats = totalFlats - occupiedFlats;
 
-  // Separate component for PDF rendering with inline hex styles (to avoid OKLCH color parsing issues)
+  // Separate component for PDF rendering with inline styles for PDF
   const PDFContent = () => (
-    <div className="p-6 max-w-4xl mx-auto" style={{ width: '794px', pageBreakAfter: 'auto', backgroundColor: '#ffffff' }}>
+    <div style={{ width: `${PDF_CONTENT_WIDTH_PX}px`, padding: '24px', margin: '0 auto', pageBreakAfter: 'auto', backgroundColor: '#ffffff', boxSizing: 'border-box' }}>
       {/* Header */}
-      <div className="text-center mb-4 pb-3 border-b-2" style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid', borderColor: '#d1d5db' }}>
-        <h1 className="text-2xl font-bold mb-1" style={{ color: '#111827' }}>
+      <div style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid', textAlign: 'center', marginBottom: '20px', paddingBottom: '16px', borderBottom: '2px solid #d1d5db' }}>
+        <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#111827', textAlign: 'center', lineHeight: '1.2' }}>
           {t.building.residentList}
         </h1>
-        <h2 className="text-lg font-semibold mb-1" style={{ color: '#2563eb' }}>{building.name}</h2>
-        <p className="text-sm" style={{ color: '#4b5563' }}>{building.address}</p>
-        <p className="text-xs mt-1" style={{ color: '#6b7280' }}>
+        <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#2563eb', textAlign: 'center', lineHeight: '1.3' }}>{building.name}</h2>
+        <p style={{ fontSize: '14px', marginBottom: '4px', color: '#4b5563', textAlign: 'center', lineHeight: '1.5' }}>{building.address}</p>
+        <p style={{ fontSize: '12px', marginTop: '8px', color: '#6b7280', textAlign: 'center', lineHeight: '1.4' }}>
           {t.pdf.generatedOn}: {currentDate}
         </p>
       </div>
 
       {/* Statistics Summary */}
-      <div className="grid grid-cols-2 gap-3 mb-4 p-3 border rounded-lg" style={{ pageBreakInside: 'avoid', pageBreakAfter: 'avoid', backgroundColor: '#eff6ff', borderColor: '#bfdbfe' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '20px', padding: '16px', border: '1px solid #bfdbfe', borderRadius: '8px', pageBreakInside: 'avoid', pageBreakAfter: 'avoid', backgroundColor: '#eff6ff', boxSizing: 'border-box' }}>
         <div>
-          <p className="text-sm" style={{ color: '#4b5563' }}>{t.stats.totalFlats}</p>
-          <p className="text-2xl font-bold" style={{ color: '#2563eb' }}>{totalFlats}</p>
+          <p style={{ fontSize: '14px', marginBottom: '4px', color: '#4b5563', lineHeight: '1.5' }}>{t.stats.totalFlats}</p>
+          <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#2563eb', lineHeight: '1.2' }}>{totalFlats}</p>
         </div>
         <div>
-          <p className="text-sm" style={{ color: '#4b5563' }}>{t.stats.totalResidents}</p>
-          <p className="text-2xl font-bold" style={{ color: '#2563eb' }}>{totalResidents}</p>
+          <p style={{ fontSize: '14px', marginBottom: '4px', color: '#4b5563', lineHeight: '1.5' }}>{t.stats.totalResidents}</p>
+          <p style={{ fontSize: '24px', fontWeight: 'bold', color: '#2563eb', lineHeight: '1.2' }}>{totalResidents}</p>
         </div>
         <div>
-          <p className="text-sm" style={{ color: '#4b5563' }}>{t.flat.owned}</p>
-          <p className="text-xl font-semibold" style={{ color: '#16a34a' }}>{ownedFlats}</p>
+          <p style={{ fontSize: '14px', marginBottom: '4px', color: '#4b5563', lineHeight: '1.5' }}>{t.flat.owned}</p>
+          <p style={{ fontSize: '20px', fontWeight: '600', color: '#16a34a', lineHeight: '1.2' }}>{ownedFlats}</p>
         </div>
         <div>
-          <p className="text-sm" style={{ color: '#4b5563' }}>{t.flat.rented}</p>
-          <p className="text-xl font-semibold" style={{ color: '#ea580c' }}>{rentedFlats}</p>
+          <p style={{ fontSize: '14px', marginBottom: '4px', color: '#4b5563', lineHeight: '1.5' }}>{t.flat.rented}</p>
+          <p style={{ fontSize: '20px', fontWeight: '600', color: '#ea580c', lineHeight: '1.2' }}>{rentedFlats}</p>
         </div>
         <div>
-          <p className="text-sm" style={{ color: '#4b5563' }}>{t.stats.occupied}</p>
-          <p className="text-xl font-semibold" style={{ color: '#374151' }}>{occupiedFlats}</p>
+          <p style={{ fontSize: '14px', marginBottom: '4px', color: '#4b5563', lineHeight: '1.5' }}>{t.stats.occupied}</p>
+          <p style={{ fontSize: '20px', fontWeight: '600', color: '#374151', lineHeight: '1.2' }}>{occupiedFlats}</p>
         </div>
         <div>
-          <p className="text-sm" style={{ color: '#4b5563' }}>{t.stats.vacant}</p>
-          <p className="text-xl font-semibold" style={{ color: '#374151' }}>{vacantFlats}</p>
+          <p style={{ fontSize: '14px', marginBottom: '4px', color: '#4b5563', lineHeight: '1.5' }}>{t.stats.vacant}</p>
+          <p style={{ fontSize: '20px', fontWeight: '600', color: '#374151', lineHeight: '1.2' }}>{vacantFlats}</p>
         </div>
       </div>
 
@@ -133,34 +133,36 @@ export default function ResidentsPrint({
           : `${t.flat.floor} ${floor}`;
 
         return (
-          <div key={floor} className="mb-3" style={{ pageBreakBefore: 'auto', pageBreakInside: 'avoid' }}>
+          <div key={floor} style={{ marginBottom: '16px', pageBreakBefore: 'auto', pageBreakInside: 'avoid' }}>
             {/* Floor Header */}
-            <div className="px-3 py-1 rounded-t-lg border-b-2" style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid', backgroundColor: '#f3f4f6', borderColor: '#d1d5db' }}>
-              <h3 className="text-base font-bold" style={{ color: '#111827' }}>{floorLabel}</h3>
-              <p className="text-xs" style={{ color: '#4b5563' }}>
+            <div style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid', padding: '8px 12px', borderTopLeftRadius: '8px', borderTopRightRadius: '8px', borderBottom: '2px solid #d1d5db', backgroundColor: '#f3f4f6' }}>
+              <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '4px', color: '#111827', lineHeight: '1.4' }}>{floorLabel}</h3>
+              <p style={{ fontSize: '12px', color: '#4b5563', lineHeight: '1.4' }}>
                 {flats.length} {flats.length === 1 ? t.pdf.flat : t.pdf.flats}
               </p>
             </div>
 
             {/* Flats */}
-            <div className="border border-t-0 rounded-b-lg overflow-hidden" style={{ borderColor: '#d1d5db' }}>
+            <div style={{ border: '1px solid #d1d5db', borderTop: 'none', borderBottomLeftRadius: '8px', borderBottomRightRadius: '8px', overflow: 'hidden' }}>
               {flats.map((flat, idx) => (
                 <div
                   key={flat.id}
-                  className="p-2"
                   style={{
+                    padding: '12px',
                     pageBreakInside: 'avoid',
                     backgroundColor: flat.residents.length === 0 ? '#f9fafb' : 'transparent',
                     borderTop: idx > 0 ? '1px solid #e5e7eb' : 'none'
                   }}
                 >
                   {/* Flat Header */}
-                  <div className="flex items-start justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-base font-bold" style={{ color: '#111827' }}>{flat.flatNumber}</span>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#111827' }}>{flat.flatNumber}</span>
                       <span
-                        className="text-xs px-1 py-0.5 rounded"
                         style={{
+                          fontSize: '12px',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
                           backgroundColor: flat.ownershipType === 'owned' ? '#dcfce7' : '#ffedd5',
                           color: flat.ownershipType === 'owned' ? '#15803d' : '#c2410c'
                         }}
@@ -168,9 +170,9 @@ export default function ResidentsPrint({
                         {flat.ownershipType === 'owned' ? t.flat.owned : t.flat.rented}
                       </span>
                     </div>
-                    <div className="text-right text-xs" style={{ color: '#4b5563' }}>
+                    <div style={{ textAlign: 'right', fontSize: '12px', color: '#4b5563' }}>
                       {flat.motorcycleParkingCount > 0 && (
-                        <span className="mr-3">
+                        <span style={{ marginRight: '12px' }}>
                           M: {flat.motorcycleParkingCount}
                         </span>
                       )}
@@ -184,42 +186,42 @@ export default function ResidentsPrint({
 
                   {/* Residents */}
                   {flat.residents.length === 0 ? (
-                    <p className="text-xs italic" style={{ color: '#6b7280' }}>
+                    <p style={{ fontSize: '12px', fontStyle: 'italic', color: '#6b7280' }}>
                       {t.pdf.noResidents}
                     </p>
                   ) : (
-                    <div className="space-y-1">
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       {flat.residents.map((resident) => (
-                        <div key={resident.id} className="p-2 rounded border" style={{ pageBreakInside: 'avoid', backgroundColor: '#f9fafb', borderColor: '#e5e7eb' }}>
-                          <p className="font-semibold text-sm" style={{ color: '#111827' }}>{resident.name}</p>
-                          <div className="grid grid-cols-2 gap-1 mt-0.5 text-xs" style={{ color: '#4b5563' }}>
+                        <div key={resident.id} style={{ padding: '10px', borderRadius: '4px', border: '1px solid #e5e7eb', pageBreakInside: 'avoid', backgroundColor: '#f9fafb' }}>
+                          <p style={{ fontWeight: '600', fontSize: '14px', marginBottom: '6px', color: '#111827', lineHeight: '1.4' }}>{resident.name}</p>
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '12px', color: '#4b5563', lineHeight: '1.5' }}>
                             {resident.phone && (
                               <div>
-                                <span className="font-medium">{t.pdf.phone}:</span>{' '}
+                                <span style={{ fontWeight: '500' }}>{t.pdf.phone}:</span>{' '}
                                 {resident.phone}
                               </div>
                             )}
                             {resident.email && (
                               <div>
-                                <span className="font-medium">{t.pdf.email}:</span>{' '}
+                                <span style={{ fontWeight: '500' }}>{t.pdf.email}:</span>{' '}
                                 {resident.email}
                               </div>
                             )}
                             {resident.nid && (
                               <div>
-                                <span className="font-medium">{t.pdf.nid}:</span>{' '}
+                                <span style={{ fontWeight: '500' }}>{t.pdf.nid}:</span>{' '}
                                 {resident.nid}
                               </div>
                             )}
                             {resident.moveInDate && (
                               <div>
-                                <span className="font-medium">{t.pdf.moveIn}:</span>{' '}
+                                <span style={{ fontWeight: '500' }}>{t.pdf.moveIn}:</span>{' '}
                                 {new Date(resident.moveInDate).toLocaleDateString(getLocaleCode(language))}
                               </div>
                             )}
                           </div>
                           {resident.notes && (
-                            <p className="text-xs mt-0.5 italic" style={{ color: '#4b5563' }}>{resident.notes}</p>
+                            <p style={{ fontSize: '12px', marginTop: '6px', fontStyle: 'italic', color: '#4b5563', lineHeight: '1.5' }}>{resident.notes}</p>
                           )}
                         </div>
                       ))}
@@ -228,7 +230,7 @@ export default function ResidentsPrint({
 
                   {/* Flat Notes */}
                   {flat.notes && (
-                    <p className="text-xs mt-1 italic border-t pt-1" style={{ color: '#4b5563', borderColor: '#e5e7eb' }}>
+                    <p style={{ fontSize: '12px', marginTop: '8px', fontStyle: 'italic', borderTop: '1px solid #e5e7eb', paddingTop: '8px', color: '#4b5563', lineHeight: '1.5' }}>
                       {flat.notes}
                     </p>
                   )}
@@ -240,11 +242,14 @@ export default function ResidentsPrint({
       })}
 
       {/* Footer */}
-      <div className="mt-4 pt-2 border-t text-center text-xs" style={{ pageBreakBefore: 'auto', pageBreakInside: 'avoid', borderColor: '#d1d5db', color: '#6b7280' }}>
-        <p>
+      <div style={{ marginTop: '20px', paddingTop: '12px', borderTop: '1px solid #d1d5db', textAlign: 'center', fontSize: '12px', pageBreakBefore: 'auto', pageBreakInside: 'avoid', color: '#6b7280' }}>
+        <p style={{ textAlign: 'center', lineHeight: '1.5' }}>
           {uiMsgs.generatedFrom}:{' '}
-          <a href={window.location.href} className="underline" style={{ color: '#2563eb' }}>
-            {window.location.hostname + window.location.pathname}
+          <a 
+            href={window.location.href} 
+            style={{ color: '#2563eb', textDecoration: 'underline' }}
+          >
+            {window.location.href}
           </a>
         </p>
       </div>
@@ -409,8 +414,11 @@ export default function ResidentsPrint({
       <div className="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-gray-300 text-center text-xs sm:text-sm text-gray-500">
         <p className="break-words">
           {uiMsgs.generatedFrom}:{' '}
-          <a href={window.location.href} className="text-blue-600 underline">
-            {window.location.hostname + window.location.pathname}
+          <a 
+            href={window.location.href} 
+            className="text-blue-600 underline"
+          >
+            {window.location.href}
           </a>
         </p>
       </div>
@@ -484,9 +492,9 @@ export default function ResidentsPrint({
       {/* Offscreen rendering for PDF generation - Fixed width for consistent output */}
       <div
         className="fixed -left-[9999px] -top-[9999px]"
-        style={{ width: '794px' }} // A4 width at 96 DPI
+        style={{ width: `${PDF_CONTENT_WIDTH_PX}px` }} // Calculated PDF usable width
       >
-        <div ref={offscreenRef} style={{ width: '794px' }}>
+        <div ref={offscreenRef} style={{ width: `${PDF_CONTENT_WIDTH_PX}px` }}>
           <PDFContent />
         </div>
       </div>
