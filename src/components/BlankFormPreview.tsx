@@ -4,7 +4,7 @@ import html2canvas from 'html2canvas';
 import type { BillData } from '../types';
 import type { SupportedLanguage } from '../locales/config';
 import { getTranslations, getUIMessages } from '../utils/i18n';
-import { injectPDFStyles } from '../utils/pdf-helpers';
+import { injectPDFStyles } from '@encryptioner/html-to-pdf-generator';
 
 interface BlankFormPreviewProps {
   billData: BillData;

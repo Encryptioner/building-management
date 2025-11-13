@@ -2,8 +2,8 @@ import { useRef } from 'react';
 import type { Building, Flat } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
 import { getTranslations, getLocaleCode, getUIMessages } from '../../utils/i18n';
-import { usePDFGeneratorManual } from '../../lib/pdf-generator/hooks';
-import { DEFAULT_PDF_OPTIONS, PDF_CONTENT_WIDTH_PX } from '../../utils/pdf-helpers';
+import { usePDFGeneratorManual } from '@encryptioner/html-to-pdf-generator/react';
+import { DEFAULT_PDF_OPTIONS, PDF_CONTENT_WIDTH_PX } from '@encryptioner/html-to-pdf-generator';
 
 interface ResidentsPrintProps {
   building: Building;

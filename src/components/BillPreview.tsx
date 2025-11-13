@@ -6,7 +6,7 @@ import type { SupportedLanguage } from '../locales/config';
 import { getTranslations, getLocaleCode, getUIMessages } from '../utils/i18n';
 import { formatNumber } from '../utils/calculations';
 import { numberToWords } from '../utils/numberToWords';
-import { injectPDFStyles } from '../utils/pdf-helpers';
+import { injectPDFStyles } from '@encryptioner/html-to-pdf-generator';
 
 interface BillPreviewProps {
   billData: BillData;
