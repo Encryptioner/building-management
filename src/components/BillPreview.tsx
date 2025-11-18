@@ -243,6 +243,8 @@ export default function BillPreview({
                           <td className="px-3 py-2 text-xs" style={{border: '2px solid #1f2937'}}>
                             {category.billType === 'single-flat'
                               ? t.category.singleFlat
+                              : category.excludedFlats && category.excludedFlats > 0
+                              ? `${formatNumber(category.amount)} ÷ (${billData.numberOfFlats} - ${category.excludedFlats})`
                               : `${formatNumber(category.amount)} ÷ ${billData.numberOfFlats}`}
                           </td>
                           <td className="px-3 py-2 text-right font-bold text-sm whitespace-nowrap" style={{border: '2px solid #1f2937'}}>
@@ -321,6 +323,8 @@ export default function BillPreview({
                         <td className="border border-gray-300 px-3 py-2 text-xs">
                           {category.billType === 'single-flat'
                             ? t.category.singleFlat
+                            : category.excludedFlats && category.excludedFlats > 0
+                            ? `${formatNumber(category.amount)} ÷ (${billData.numberOfFlats} - ${category.excludedFlats})`
                             : `${formatNumber(category.amount)} ÷ ${billData.numberOfFlats}`}
                         </td>
                         <td className="border border-gray-300 px-3 py-2 text-right font-medium text-sm whitespace-nowrap">

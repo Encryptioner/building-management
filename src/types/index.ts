@@ -8,6 +8,7 @@ export interface ServiceCategory {
   billType: BillType;
   amount: number;
   isOwnerOnly?: boolean; // If true, this charge applies only to flat owners
+  excludedFlats?: number; // Number of flats to exclude from this category (e.g., vacant/unoccupied flats)
 }
 
 export interface GarageSpace {
