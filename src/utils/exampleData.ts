@@ -37,6 +37,7 @@ For queries, contact: +880 1912345678`,
       info: 'WASA Bill for the entire building',
       billType: 'all-building',
       amount: 20000,
+      excludedFlats: 2,
     },
     {
       id: '3',
@@ -149,6 +150,7 @@ const calculatedExampleDataBn: BillData = {
       info: 'সম্পূর্ণ ভবনের জন্য ওয়াসা বিল',
       billType: 'all-building',
       amount: 20000,
+      excludedFlats: 2,
     },
     {
       id: '3',

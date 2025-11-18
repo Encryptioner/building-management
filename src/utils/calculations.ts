@@ -16,8 +16,10 @@ export function calculateBillSummary(
       // Amount is per flat
       categoryPerFlat = category.amount;
     } else {
-      // Amount is divided among all flats, rounded up to nearest integer
-      categoryPerFlat = numberOfFlats > 0 ? Math.ceil(category.amount / numberOfFlats) : 0;
+      // Amount is divided among flats (excluding vacant/unoccupied flats), rounded up to nearest integer
+      const excludedFlats = category.excludedFlats || 0;
+      const activeFlats = Math.max(numberOfFlats - excludedFlats, 1); // Ensure at least 1 flat
+      categoryPerFlat = Math.ceil(category.amount / activeFlats);
     }
 
     // Separate owner-only categories from regular categories
