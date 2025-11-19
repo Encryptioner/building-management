@@ -17,7 +17,7 @@ const config = {
     base: '/building-management/',
   },
   custom: {
-    site: process.env.SITE_URL || 'https://servicecharge.example.com',
+    site: process.env.SITE_URL || 'https://buildingmanagement.example.com',
     base: '/',
   },
 };
