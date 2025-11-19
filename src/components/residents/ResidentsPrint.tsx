@@ -245,14 +245,36 @@ export default function ResidentsPrint({
       <div style={{ marginTop: '20px', paddingTop: '12px', borderTop: '1px solid #d1d5db', textAlign: 'center', fontSize: '12px', pageBreakBefore: 'auto', pageBreakInside: 'avoid', color: '#6b7280' }}>
         <p style={{ textAlign: 'center', lineHeight: '1.5' }}>
           {uiMsgs.generatedFrom}:{' '}
-          <a 
-            href={window.location.href} 
+          <a
+            href={window.location.href}
             style={{ color: '#2563eb', textDecoration: 'underline' }}
           >
             {window.location.href}
           </a>
         </p>
       </div>
+
+      {/* Reference Images - Each on its own page */}
+      {building.referenceImages && building.referenceImages.length > 0 && (
+        <>
+          {building.referenceImages.map((image, index) => (
+            <div key={index} style={{ pageBreakBefore: 'always', pageBreakAfter: 'auto', pageBreakInside: 'avoid', width: `${PDF_CONTENT_WIDTH_PX}px`, padding: '24px', margin: '0 auto' }}>
+              <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827' }}>
+                  {t.images.referenceImagesPage} {index + 1}
+                </h2>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <img
+                  src={image}
+                  alt={`${t.images.referenceImage} ${index + 1}`}
+                  style={{ maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px', border: '2px solid #d1d5db' }}
+                />
+              </div>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 
@@ -414,14 +436,37 @@ export default function ResidentsPrint({
       <div className="mt-4 sm:mt-8 pt-3 sm:pt-4 border-t border-gray-300 text-center text-xs sm:text-sm text-gray-500">
         <p className="break-words">
           {uiMsgs.generatedFrom}:{' '}
-          <a 
-            href={window.location.href} 
+          <a
+            href={window.location.href}
             className="text-blue-600 underline"
           >
             {window.location.href}
           </a>
         </p>
       </div>
+
+      {/* Reference Images - Preview on new sections */}
+      {building.referenceImages && building.referenceImages.length > 0 && (
+        <div className="mt-8 space-y-8">
+          {building.referenceImages.map((image, index) => (
+            <div key={index} className="border-t-2 border-gray-300 pt-8">
+              <div className="text-center mb-4">
+                <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                  {t.images.referenceImagesPage} {index + 1}
+                </h2>
+              </div>
+              <div className="flex justify-center items-center">
+                <img
+                  src={image}
+                  alt={`${t.images.referenceImage} ${index + 1}`}
+                  className="max-w-full h-auto rounded border-2 border-gray-300"
+                  style={{ maxHeight: '70vh', objectFit: 'contain' }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 

@@ -271,4 +271,20 @@ export const bn = {
   numbers: {
     negative: 'ঋণাত্মক',
   },
+  images: {
+    referenceImages: 'রেফারেন্স ছবি',
+    optional: '(ঐচ্ছিক)',
+    addImage: 'ছবি যোগ করুন',
+    addFirstImage: 'আপনার প্রথম ছবি যোগ করুন',
+    removeImage: 'ছবি সরান',
+    referenceImage: 'রেফারেন্স ছবি',
+    noImagesYet: 'এখনও কোনো রেফারেন্স ছবি যোগ করা হয়নি',
+    imagesCount: 'ছবি',
+    helpText: 'রেফারেন্স ছবি যোগ করুন (প্রতিটি ছবি সর্বোচ্চ ৫ এমবি)। ছবিগুলো প্রিভিউ এবং পিডিএফ-এ আলাদা পেজে দেখাবে।',
+    maxImagesExceeded: 'সর্বোচ্চ {max}টি ছবি অনুমোদিত',
+    invalidFileType: 'অবৈধ ফাইল টাইপ',
+    fileTooLarge: 'ফাইল খুব বড় (সর্বোচ্চ ৫ এমবি)',
+    uploadError: 'ছবি আপলোড করতে ত্রুটি। আবার চেষ্টা করুন।',
+    referenceImagesPage: 'রেফারেন্স ছবি',
+  },
 };
