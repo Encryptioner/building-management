@@ -5,7 +5,12 @@
     "**/*"
   ],
   "exclude": [
-    "dist"
+    "dist",
+    "docs/examples",
+    "src/lib/pdf-generator/EXAMPLE.tsx",
+    "src/lib/pdf-generator/tsup.config.ts",
+    "src/lib/pdf-generator/adapters/vue",
+    "src/lib/pdf-generator/adapters/svelte"
   ],
   "compilerOptions": {
     "jsx": "react-jsx",

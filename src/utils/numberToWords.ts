@@ -115,6 +115,12 @@ function numberToWordsBangla(num: number): string {
   return parts.join(' ');
 }
 
+// Negative number prefixes by language
+const NEGATIVE_PREFIXES: Record<string, string> = {
+  'bn': 'ঋণাত্মক',
+  'en': 'Negative',
+};
+
 /**
  * Converts a number to words in the specified language
  * @param num - The number to convert
@@ -124,7 +130,7 @@ function numberToWordsBangla(num: number): string {
 export function numberToWords(num: number, language: string = 'en'): string {
   // Handle negative numbers
   if (num < 0) {
-    const prefix = language === 'bn' ? 'ঋণাত্মক' : 'Negative';
+    const prefix = NEGATIVE_PREFIXES[language] || NEGATIVE_PREFIXES['en'];
     return prefix + ' ' + numberToWords(Math.abs(num), language);
   }
 

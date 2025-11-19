@@ -1,7 +1,29 @@
 {
-  "name": "growing-gravity",
+  "name": "building-management",
+  "version": "2.0.0",
+  "description": "Complete building management solution for apartment complexes. Manage residents, flats, and service charge bills with ease.",
   "type": "module",
-  "version": "0.0.1",
+  "author": {
+    "name": "Ankur Mursalin",
+    "email": "mir.ankur.ruet13@gmail.com",
+    "url": "https://encryptioner.github.io/"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Encryptioner/building-management.git"
+  },
+  "homepage": "https://encryptioner.github.io/building-management/",
+  "keywords": [
+    "building-management",
+    "apartment-management",
+    "service-charge",
+    "bill-calculator",
+    "residents-management",
+    "pwa",
+    "astro",
+    "react"
+  ],
   "scripts": {
     "dev": "astro dev",
     "build": "node scripts/prepare-manifest.js && astro build",
@@ -13,6 +35,7 @@
   "dependencies": {
     "@astrojs/check": "^0.9.5",
     "@astrojs/react": "^4.4.0",
+    "@encryptioner/html-to-pdf-generator": "^1.0.2",
     "@tailwindcss/vite": "^4.1.14",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",

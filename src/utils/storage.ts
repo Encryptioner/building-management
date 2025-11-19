@@ -1,7 +1,7 @@
 import type { BillData } from '../types';
 
-const STORAGE_KEY_CALCULATED = 'service-charge-bill-data-calculated';
-const STORAGE_KEY_BLANK = 'service-charge-bill-data-blank';
+const STORAGE_KEY_CALCULATED = 'building-management-bill-data-calculated';
+const STORAGE_KEY_BLANK = 'building-management-bill-data-blank';
 
 export type FormMode = 'calculated' | 'blank';
 

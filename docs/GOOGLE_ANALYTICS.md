@@ -1,6 +1,6 @@
 # Google Analytics Setup Guide
 
-Quick setup guide for Google Analytics 4 in Service Charge Bill Calculator.
+Quick setup guide for Google Analytics 4 in Building Management.
 
 ## Quick Setup
 

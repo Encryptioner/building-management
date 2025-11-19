@@ -1,6 +1,6 @@
 # PWA Icon Generation Guide
 
-To generate PWA icons for the Service Charge Bill Calculator:
+To generate PWA icons for the Building Management:
 
 ## Option 1: Using Online Tools (Recommended)
 
@@ -41,7 +41,7 @@ For now, placeholders are created. Replace them with:
 ## Current Setup
 
 The manifest.json is already configured to use:
-- `/service-charge/icon-192.png`
-- `/service-charge/icon-512.png`
+- `/building-management/icon-192.png`
+- `/building-management/icon-512.png`
 
 Just replace the placeholder files with your actual icons!

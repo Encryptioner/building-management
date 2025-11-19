@@ -118,6 +118,29 @@ export default function CategoryForm({
           </div>
         )}
 
+        {/* Excluded Flats */}
+        {!isBlankMode && category.billType === 'all-building' && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t.category.excludedFlats}
+              <span className="text-xs text-gray-500 ml-2">
+                ({t.category.excludedFlatsHelp})
+              </span>
+            </label>
+            <input
+              type="number"
+              value={category.excludedFlats || 0}
+              onChange={(e) => onUpdate({ excludedFlats: parseInt(e.target.value) || 0 })}
+              placeholder="0"
+              min="0"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              {t.category.excludedFlatsNote}
+            </p>
+          </div>
+        )}
+
         {/* Owner Only Checkbox */}
         <div className="md:col-span-2">
           <div className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">

@@ -82,14 +82,22 @@ export const getConfirmationMessages = (language: string) => {
     en: {
       clearAllTitle: 'Clear All Data?',
       clearAllMessage: 'This will permanently delete all your bill data. This action cannot be undone.',
+      clearBuildingTitle: 'Clear Building Data?',
+      clearBuildingMessage: 'This will permanently delete all building and resident data. This action cannot be undone.',
       confirmButton: 'Yes, Clear All',
+      confirmClear: 'Yes, Clear All',
       cancelButton: 'Cancel',
+      cancel: 'Cancel',
     },
     bn: {
       clearAllTitle: 'সব ডেটা মুছবেন?',
       clearAllMessage: 'এটি আপনার সমস্ত বিল ডেটা স্থায়ীভাবে মুছে ফেলবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।',
+      clearBuildingTitle: 'বিল্ডিং ডেটা মুছবেন?',
+      clearBuildingMessage: 'এটি আপনার সমস্ত বিল্ডিং এবং বাসিন্দা ডেটা স্থায়ীভাবে মুছে ফেলবে। এই কাজটি পূর্বাবস্থায় ফেরানো যাবে না।',
       confirmButton: 'হ্যাঁ, সব মুছুন',
+      confirmClear: 'হ্যাঁ, সব মুছুন',
       cancelButton: 'বাতিল',
+      cancel: 'বাতিল',
     },
     // Add new languages here:
     // hi: {

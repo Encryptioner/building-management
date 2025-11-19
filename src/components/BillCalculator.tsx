@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { BillData, ServiceCategory } from '../types';
 import type { SupportedLanguage } from '../locales/config';
-import { isLanguageSupported } from '../locales/config';
 import { calculateBillSummary, formatNumber } from '../utils/calculations';
 import { saveBillData, loadBillData, clearBillData } from '../utils/storage';
 import { getExampleData } from '../utils/exampleData';
 import { getTranslations, getValidationMessages, getConfirmationMessages, getUIMessages } from '../utils/i18n';
 import { numberToWords } from '../utils/numberToWords';
+import { exportBillData, importBillDataFromFile } from '../utils/dataExport';
 import CategoryForm from './CategoryForm';
 import BillPreview from './BillPreview';
 import BlankFormPreview from './BlankFormPreview';
 import HelpSection from './HelpSection';
-import LanguageSelector from './LanguageSelector';
 import ConfirmModal from './ConfirmModal';
 
 // Helper function to get empty bill data
@@ -33,18 +32,16 @@ const getEmptyBillData = (): BillData => ({
   showCarInBlankForm: true, // Default to showing car spaces in blank form
 });
 
-export default function BillCalculator() {
-  // Load language from localStorage or default to 'bn' (Bangla)
-  const [language, setLanguage] = useState<SupportedLanguage>('bn');
+interface BillCalculatorProps {
+  language: SupportedLanguage;
+}
+
+export default function BillCalculator({ language }: BillCalculatorProps) {
   const [isClient, setIsClient] = useState(false);
 
-  // Initialize language and form mode on client side only
+  // Initialize form mode on client side only
   useEffect(() => {
     setIsClient(true);
-    const savedLang = localStorage.getItem('preferred-language');
-    if (savedLang && isLanguageSupported(savedLang)) {
-      setLanguage(savedLang);
-    }
 
     const savedMode = localStorage.getItem('preferred-form-mode');
     if (savedMode === 'blank' || savedMode === 'calculated') {
@@ -66,6 +63,8 @@ export default function BillCalculator() {
     numberOfFlats?: string;
     categories?: { [key: string]: { name?: string; amount?: string } };
   }>({});
+  const [isImporting, setIsImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const t = getTranslations(language);
   const validationMsgs = getValidationMessages(language);
@@ -127,11 +126,6 @@ export default function BillCalculator() {
       return () => clearTimeout(timeoutId);
     }
   }, [billData, formMode]);
-
-  // Save language preference to localStorage
-  useEffect(() => {
-    localStorage.setItem('preferred-language', language);
-  }, [language]);
 
   // Save form mode preference to localStorage
   useEffect(() => {
@@ -258,6 +252,42 @@ export default function BillCalculator() {
     setShowClearConfirm(false);
   };
 
+  const handleExport = () => {
+    exportBillData(billData);
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const result = await importBillDataFromFile(file);
+
+      if (result.success && result.data) {
+        setBillData(result.data);
+        setValidationErrors({});
+        setShowHelp(false);
+        saveBillData(result.data, formMode);
+      } else {
+        alert(`${t.errors.importFailed}: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Failed to import data:', error);
+      alert(t.errors.importFileFailed);
+    } finally {
+      setIsImporting(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const handleGarageChange = (field: keyof typeof billData.garage, value: string | number) => {
     setBillData((prev) => ({
       ...prev,
@@ -280,7 +310,7 @@ export default function BillCalculator() {
           }`}>
             <div className="flex items-center gap-3 flex-1 min-w-0">
               <img
-                src={`${import.meta.env.BASE_URL}icon.svg`}
+                src={`${import.meta.env.BASE_URL}icon-bills.svg`}
                 alt="Service Charge Icon"
                 className="w-8 h-8 flex-shrink-0"
               />
@@ -316,12 +346,34 @@ export default function BillCalculator() {
                 </svg>
                 <span>{uiMsgs.example}</span>
               </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+              <button
+                onClick={handleImportClick}
+                disabled={isImporting}
+                className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span>{isImporting ? t.actions.importing : t.actions.import}</span>
+              </button>
+              <button
+                onClick={handleExport}
+                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>{t.actions.export}</span>
+              </button>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
-              {/* Language selector on desktop */}
-              <div className="hidden md:block">
-                <LanguageSelector currentLanguage={language} onLanguageChange={setLanguage} />
-              </div>
               {/* Expand button - always on the right */}
               <button
                 onClick={() => setIsHeaderCollapsed(false)}
@@ -354,11 +406,11 @@ export default function BillCalculator() {
               </svg>
             </button>
 
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pr-12">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <img
-                  src={`${import.meta.env.BASE_URL}icon.svg`}
+                  src={`${import.meta.env.BASE_URL}icon-bills.svg`}
                   alt="Service Charge Icon"
                   className="w-10 h-10 sm:w-12 sm:h-12 flex-shrink-0"
                 />
@@ -371,6 +423,32 @@ export default function BillCalculator() {
               </div>
             </div>
             <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+              {/* Preview Button - Show only if there's data */}
+              {billData.categories.length > 0 && (
+                <button
+                  onClick={() => {
+                    if (formMode === 'calculated') {
+                      if (validateForm()) {
+                        setShowPreview(true);
+                      }
+                    } else {
+                      // Blank mode - only validate title and categories exist
+                      if (billData.title.trim() && billData.categories.length > 0) {
+                        setShowPreview(true);
+                      }
+                    }
+                  }}
+                  className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2"
+                  title={t.actions.preview}
+                >
+                  <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  <span className="hidden sm:inline">{t.actions.preview}</span>
+                  <span className="sm:hidden">{t.actions.previewShort}</span>
+                </button>
+              )}
               <button
                 onClick={handleToggleHelp}
                 className={`px-3 sm:px-4 py-2 rounded-lg transition-all font-medium text-sm sm:text-base flex items-center gap-2 ${
@@ -389,6 +467,7 @@ export default function BillCalculator() {
               <button
                 onClick={loadExample}
                 className="px-3 sm:px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2"
+                title={t.actions.loadExample}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -396,7 +475,27 @@ export default function BillCalculator() {
                 <span className="hidden sm:inline">{t.actions.loadExample}</span>
                 <span className="sm:hidden">{uiMsgs.example}</span>
               </button>
-              <LanguageSelector currentLanguage={language} onLanguageChange={setLanguage} />
+              <button
+                onClick={handleImportClick}
+                disabled={isImporting}
+                className="p-2 sm:px-4 sm:py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                title={t.actions.import}
+              >
+                <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span className="hidden sm:inline">{isImporting ? t.actions.importing : t.actions.import}</span>
+              </button>
+              <button
+                onClick={handleExport}
+                className="p-2 sm:px-4 sm:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2"
+                title={t.actions.export}
+              >
+                <svg className="w-5 h-5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span className="hidden sm:inline">{t.actions.export}</span>
+              </button>
             </div>
           </div>
 
@@ -918,15 +1017,16 @@ export default function BillCalculator() {
         )}
 
         {/* Actions */}
-        <div className="flex flex-wrap gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
           <button
             onClick={() => setShowClearConfirm(true)}
-            className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
-            {t.actions.clearAll}
+            <span className="hidden xs:inline">{t.actions.clearAll}</span>
+            <span className="xs:hidden">{t.actions.clearShort}</span>
           </button>
           <button
             onClick={() => {
@@ -942,13 +1042,14 @@ export default function BillCalculator() {
               }
             }}
             disabled={billData.categories.length === 0}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            {t.actions.preview}
+            <span className="hidden xs:inline">{t.actions.preview}</span>
+            <span className="xs:hidden">{t.actions.previewShort}</span>
           </button>
         </div>
       </main>
