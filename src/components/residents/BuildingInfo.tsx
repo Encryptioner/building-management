@@ -3,6 +3,7 @@ import type { Building } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
 import { getTranslations, getValidationMessages } from '../../utils/i18n';
 import { updateBuilding, getBuildingStats } from '../../utils/buildingStorage';
+import ImageUploader from '../ImageUploader';
 
 interface BuildingInfoProps {
   building: Building;
@@ -15,6 +16,7 @@ export default function BuildingInfo({ building, language, onUpdate }: BuildingI
   const [name, setName] = useState(building.name);
   const [address, setAddress] = useState(building.address);
   const [totalFloors, setTotalFloors] = useState(building.totalFloors.toString());
+  const [referenceImages, setReferenceImages] = useState<string[]>(building.referenceImages || []);
   const [errors, setErrors] = useState<{
     name?: string;
     address?: string;
@@ -56,6 +58,7 @@ export default function BuildingInfo({ building, language, onUpdate }: BuildingI
         name: name.trim(),
         address: address.trim(),
         totalFloors: parseInt(totalFloors),
+        referenceImages,
       });
       setIsEditing(false);
       onUpdate();
@@ -69,6 +72,7 @@ export default function BuildingInfo({ building, language, onUpdate }: BuildingI
     setName(building.name);
     setAddress(building.address);
     setTotalFloors(building.totalFloors.toString());
+    setReferenceImages(building.referenceImages || []);
     setErrors({});
     setIsEditing(false);
   };
@@ -138,6 +142,16 @@ export default function BuildingInfo({ building, language, onUpdate }: BuildingI
             {errors.totalFloors && (
               <p className="mt-1 text-sm text-red-600">{errors.totalFloors}</p>
             )}
+          </div>
+
+          {/* Reference Images */}
+          <div>
+            <ImageUploader
+              images={referenceImages}
+              onImagesChange={setReferenceImages}
+              language={language}
+              maxImages={10}
+            />
           </div>
 
           {/* Action Buttons */}

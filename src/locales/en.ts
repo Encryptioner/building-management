@@ -271,4 +271,20 @@ export const en = {
   numbers: {
     negative: 'Negative',
   },
+  images: {
+    referenceImages: 'Reference Images',
+    optional: '(Optional)',
+    addImage: 'Add Image',
+    addFirstImage: 'Add Your First Image',
+    removeImage: 'Remove Image',
+    referenceImage: 'Reference Image',
+    noImagesYet: 'No reference images added yet',
+    imagesCount: 'Images',
+    helpText: 'Add reference images (max 5MB per image). Images will appear on separate pages in preview and PDF.',
+    maxImagesExceeded: 'Maximum {max} images allowed',
+    invalidFileType: 'Invalid file type',
+    fileTooLarge: 'File too large (max 5MB)',
+    uploadError: 'Error uploading images. Please try again.',
+    referenceImagesPage: 'Reference Images',
+  },
 };

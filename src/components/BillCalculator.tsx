@@ -12,6 +12,7 @@ import BillPreview from './BillPreview';
 import BlankFormPreview from './BlankFormPreview';
 import HelpSection from './HelpSection';
 import ConfirmModal from './ConfirmModal';
+import ImageUploader from './ImageUploader';
 
 // Helper function to get empty bill data
 const getEmptyBillData = (): BillData => ({
@@ -30,6 +31,7 @@ const getEmptyBillData = (): BillData => ({
   categories: [],
   showMotorcycleInBlankForm: true, // Default to showing motorcycle spaces in blank form
   showCarInBlankForm: true, // Default to showing car spaces in blank form
+  referenceImages: [], // Initialize reference images array
 });
 
 interface BillCalculatorProps {
@@ -172,7 +174,7 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
     return Object.keys(errors).length === 0;
   };
 
-  const handleInputChange = (field: keyof BillData, value: string | number | boolean) => {
+  const handleInputChange = (field: keyof BillData, value: string | number | boolean | string[]) => {
     setBillData((prev) => ({ ...prev, [field]: value }));
 
     // Clear validation error for this field
@@ -804,6 +806,18 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
+
+            {/* Reference Images - Only show in calculated mode */}
+            {formMode === 'calculated' && (
+              <div className="md:col-span-2">
+                <ImageUploader
+                  images={billData.referenceImages || []}
+                  onImagesChange={(images) => handleInputChange('referenceImages', images)}
+                  language={language}
+                  maxImages={10}
+                />
+              </div>
+            )}
           </div>
         </div>
 

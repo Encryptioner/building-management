@@ -29,6 +29,7 @@ export interface BillData {
   categories: ServiceCategory[];
   showMotorcycleInBlankForm?: boolean; // Controls motorcycle space visibility in blank form preview
   showCarInBlankForm?: boolean; // Controls car space visibility in blank form preview
+  referenceImages?: string[]; // Base64 encoded reference images (optional)
 }
 
 export interface BillSummary {
@@ -74,6 +75,7 @@ export interface Building {
   flats: Flat[];
   createdAt: string;
   updatedAt: string;
+  referenceImages?: string[]; // Base64 encoded reference images (optional)
 }
 
 // localStorage keys

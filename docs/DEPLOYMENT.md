@@ -161,7 +161,7 @@ Ensure HTTPS is enabled (required for service workers):
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
 | `DEPLOY_TARGET` | Deployment target (`github` or `custom`) | `github` | No |
-| `SITE_URL` | Full site URL for custom domain | `https://servicecharge.example.com` | Only for custom |
+| `SITE_URL` | Full site URL for custom domain | `https://building.example.com` | Only for custom |
 
 ### Setting Environment Variables
 

@@ -43,6 +43,7 @@ export function createBuilding(name: string, address: string, totalFloors: numbe
     flats: [],
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    referenceImages: [], // Initialize reference images array
   };
   saveBuilding(building);
   return building;

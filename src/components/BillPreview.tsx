@@ -1,12 +1,13 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { generateBatchPDF, type PDFContentItem } from '@encryptioner/html-to-pdf-generator';
 import type { BillData, BillSummary } from '../types';
 import type { SupportedLanguage } from '../locales/config';
 import { getTranslations, getLocaleCode, getUIMessages } from '../utils/i18n';
 import { formatNumber } from '../utils/calculations';
 import { numberToWords } from '../utils/numberToWords';
-import { injectPDFStyles } from '@encryptioner/html-to-pdf-generator';
+import { injectPDFStyles, DEFAULT_PDF_OPTIONS, PDF_CONTENT_WIDTH_PX } from '@encryptioner/html-to-pdf-generator';
 
 interface BillPreviewProps {
   billData: BillData;
@@ -25,6 +26,10 @@ export default function BillPreview({
   const uiMsgs = getUIMessages(language);
   const printRef = useRef<HTMLDivElement>(null);
   const offscreenRef = useRef<HTMLDivElement>(null);
+  const billOnlyRef = useRef<HTMLDivElement>(null); // For bill without reference images
+  const imageRefsArray = useRef<(HTMLDivElement | null)[]>([]); // For reference images
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [pdfGenerationProgress, setPDFGenerationProgress] = useState(0);
   const currentDate = new Date().toLocaleString(getLocaleCode(language), {
     year: 'numeric',
     month: 'long',
@@ -97,40 +102,92 @@ export default function BillPreview({
 
   const handleDownloadPDF = async () => {
     try {
-      const canvas = await generateCanvas();
-      if (!canvas) return;
-
-      // Use JPEG format with compression instead of PNG
-      const imgData = canvas.toDataURL('image/jpeg', 0.85); // 85% quality for good balance
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-        compress: true, // Enable PDF compression
-      });
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      const imgY = 0;
-
-      pdf.addImage(
-        imgData,
-        'JPEG',
-        imgX,
-        imgY,
-        imgWidth * ratio,
-        imgHeight * ratio
-      );
-
-      pdf.save(getSanitizedFileName('pdf'));
+      setIsGeneratingPDF(true);
+      // Check if there are reference images
+      if (billData.referenceImages && billData.referenceImages.length > 0) {
+        // Use batch PDF generation for bill + reference images
+        await handleBatchPDFGeneration();
+      } else {
+        // Use simple canvas-based PDF for bill only
+        await handleSimplePDFGeneration();
+      }
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert(uiMsgs.pdfGenerationError);
+    } finally {
+      setIsGeneratingPDF(false);
     }
+  };
+
+  const handleSimplePDFGeneration = async () => {
+    const canvas = await generateCanvas();
+    if (!canvas) return;
+
+    // Use JPEG format with compression instead of PNG
+    const imgData = canvas.toDataURL('image/jpeg', 0.85); // 85% quality for good balance
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'mm',
+      format: 'a4',
+      compress: true, // Enable PDF compression
+    });
+
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+    const imgX = (pdfWidth - imgWidth * ratio) / 2;
+    const imgY = 0;
+
+    pdf.addImage(
+      imgData,
+      'JPEG',
+      imgX,
+      imgY,
+      imgWidth * ratio,
+      imgHeight * ratio
+    );
+
+    pdf.save(getSanitizedFileName('pdf'));
+  };
+
+  const handleBatchPDFGeneration = async () => {
+    if (!billOnlyRef.current) return;
+
+    // Prepare batch items: bill content + reference images
+    const items: PDFContentItem[] = [];
+
+    // First item: Bill content (without reference images)
+    items.push({
+      content: billOnlyRef.current,
+      pageCount: 1,
+      title: billData.title || t.header.title,
+      newPage: true,
+    });
+
+    // Add each reference image as a separate page
+    if (billData.referenceImages && billData.referenceImages.length > 0) {
+      for (let index = 0; index < billData.referenceImages.length; index++) {
+        const imageRef = imageRefsArray.current[index];
+        if (imageRef) {
+          items.push({
+            content: imageRef,
+            pageCount: 1,
+            title: `${t.images.referenceImagesPage} ${index + 1}`,
+            newPage: true, // Each image starts on a new page
+          });
+        }
+      }
+    }
+
+    // Generate the batch PDF
+    await generateBatchPDF(items, getSanitizedFileName('pdf'), {
+      ...DEFAULT_PDF_OPTIONS,
+      onProgress: (p) => {
+        setPDFGenerationProgress(p);
+      },
+    });
   };
 
   const handleShare = async () => {
@@ -179,13 +236,13 @@ export default function BillPreview({
     }
   };
 
-  const BillContent = () => (
+  const BillContent = ({ excludeReferenceImages = false }: { excludeReferenceImages?: boolean } = {}) => (
     <>
             {/* Bill Header */}
             <div className="text-center mb-8 pb-6 border-b-2 border-gray-300">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <p className="text-3xl font-bold text-gray-900 mb-2">
                 {billData.title || t.header.title}
-              </h1>
+              </p>
               <p className="text-sm font-semibold text-blue-600">
                 {uiMsgs.numberOfFlats}: {billData.numberOfFlats}
               </p>
@@ -612,14 +669,37 @@ export default function BillPreview({
             <div className="mt-8 pt-6 border-t border-gray-300 text-center text-xs text-gray-500">
               <p>
                 {uiMsgs.generatedFrom}:{' '}
-                <a 
-                  href={window.location.href} 
+                <a
+                  href={window.location.href}
                   className="text-blue-600 underline"
                 >
                   {window.location.href}
                 </a>
               </p>
             </div>
+
+            {/* Reference Images - Each on its own page */}
+            {!excludeReferenceImages && billData.referenceImages && billData.referenceImages.length > 0 && (
+              <>
+                {billData.referenceImages.map((image, index) => (
+                  <div key={index} data-reference-image style={{ pageBreakBefore: 'always', pageBreakAfter: 'auto', pageBreakInside: 'avoid' }} className="mt-8">
+                    <div className="text-center mb-4">
+                      <h2 className="text-xl font-bold text-gray-900">
+                        {t.images.referenceImagesPage} {index + 1}
+                      </h2>
+                    </div>
+                    <div className="flex justify-center items-center">
+                      <img
+                        src={image}
+                        alt={`${t.images.referenceImage} ${index + 1}`}
+                        style={{ maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain' }}
+                        className="rounded border-2 border-gray-300"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </>
+            )}
     </>
   );
 
@@ -664,18 +744,32 @@ export default function BillPreview({
             </button>
             <button
               onClick={handleDownloadPDF}
-              className="px-3 py-2 text-sm md:px-4 md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+              disabled={isGeneratingPDF}
+              className="px-3 py-2 text-sm md:px-4 md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <span className="hidden sm:inline">{t.actions.download}</span>
-              <span className="sm:hidden">PDF</span>
+              {isGeneratingPDF ? (
+                <>
+                  <svg className="w-4 h-4 md:w-5 md:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="hidden sm:inline">{pdfGenerationProgress > 0 ? `${pdfGenerationProgress}%` : (uiMsgs.generatingPDF || 'Generating...')}</span>
+                  <span className="sm:hidden">...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">{t.actions.download}</span>
+                  <span className="sm:hidden">PDF</span>
+                </>
+              )}
             </button>
             <button
               onClick={handleDownloadImage}
@@ -711,6 +805,36 @@ export default function BillPreview({
             <BillContent />
           </div>
         </div>
+      </div>
+
+      {/* Hidden containers for batch PDF generation */}
+      <div 
+        className="fixed -left-[9999px] -top-[9999px]"
+      >
+        {/* Bill content without reference images */}
+        <div ref={billOnlyRef} style={{ width: `${PDF_CONTENT_WIDTH_PX}px`, padding: '24px', margin: '0 auto', backgroundColor: '#ffffff', boxSizing: 'border-box' }}>
+          <BillContent excludeReferenceImages={true} />
+        </div>
+
+        {/* Individual reference image containers */}
+        {billData.referenceImages && billData.referenceImages.map((image, index) => (
+          <div
+            key={index}
+            ref={(el) => { imageRefsArray.current[index] = el; }}
+            style={{ width: `${PDF_CONTENT_WIDTH_PX}px`, padding: '24px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backgroundColor: '#ffffff', boxSizing: 'border-box' }}
+          >
+            <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', marginBottom: '16px', textAlign: 'center' }}>
+              {t.images.referenceImagesPage} {index + 1}
+            </h2>
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <img
+                src={image}
+                alt={`${t.images.referenceImage} ${index + 1}`}
+                style={{ maxWidth: '100%', maxHeight: '90vh', objectFit: 'contain', borderRadius: '8px', border: '2px solid #d1d5db' }}
+              />
+            </div>
+          </div>
+        ))}
       </div>
 
     </div>
