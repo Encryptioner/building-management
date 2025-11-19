@@ -160,9 +160,9 @@ export default function ResidentsPrint({
     <div style={{ width: `${PDF_CONTENT_WIDTH_PX}px`, padding: '24px', margin: '0 auto', pageBreakAfter: 'auto', backgroundColor: '#ffffff', boxSizing: 'border-box' }}>
       {/* Header */}
       <div style={{ pageBreakAfter: 'avoid', pageBreakInside: 'avoid', textAlign: 'center', marginBottom: '20px', paddingBottom: '16px', borderBottom: '2px solid #d1d5db' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#111827', textAlign: 'center', lineHeight: '1.2' }}>
+        <p style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#111827', textAlign: 'center', lineHeight: '1.2' }}>
           {t.building.residentList}
-        </h1>
+        </p>
         <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#2563eb', textAlign: 'center', lineHeight: '1.3' }}>{building.name}</h2>
         <p style={{ fontSize: '14px', marginBottom: '4px', color: '#4b5563', textAlign: 'center', lineHeight: '1.5' }}>{building.address}</p>
         <p style={{ fontSize: '12px', marginTop: '8px', color: '#6b7280', textAlign: 'center', lineHeight: '1.4' }}>

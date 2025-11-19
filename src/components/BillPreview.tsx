@@ -7,7 +7,7 @@ import type { SupportedLanguage } from '../locales/config';
 import { getTranslations, getLocaleCode, getUIMessages } from '../utils/i18n';
 import { formatNumber } from '../utils/calculations';
 import { numberToWords } from '../utils/numberToWords';
-import { injectPDFStyles, DEFAULT_PDF_OPTIONS } from '@encryptioner/html-to-pdf-generator';
+import { injectPDFStyles, DEFAULT_PDF_OPTIONS, PDF_CONTENT_WIDTH_PX } from '@encryptioner/html-to-pdf-generator';
 
 interface BillPreviewProps {
   billData: BillData;
@@ -240,9 +240,9 @@ export default function BillPreview({
     <>
             {/* Bill Header */}
             <div className="text-center mb-8 pb-6 border-b-2 border-gray-300">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <p className="text-3xl font-bold text-gray-900 mb-2">
                 {billData.title || t.header.title}
-              </h1>
+              </p>
               <p className="text-sm font-semibold text-blue-600">
                 {uiMsgs.numberOfFlats}: {billData.numberOfFlats}
               </p>
@@ -808,12 +808,12 @@ export default function BillPreview({
       </div>
 
       {/* Hidden containers for batch PDF generation */}
-      <div style={{ position: 'fixed', left: '-9999px', top: '-9999px' }}>
+      <div 
+        className="fixed -left-[9999px] -top-[9999px]"
+      >
         {/* Bill content without reference images */}
-        <div ref={billOnlyRef} style={{ width: '794px' }}>
-          <div style={{ padding: '24px', margin: '0 auto', backgroundColor: '#ffffff', boxSizing: 'border-box' }}>
-            <BillContent excludeReferenceImages={true} />
-          </div>
+        <div ref={billOnlyRef} style={{ width: `${PDF_CONTENT_WIDTH_PX}px`, padding: '24px', margin: '0 auto', backgroundColor: '#ffffff', boxSizing: 'border-box' }}>
+          <BillContent excludeReferenceImages={true} />
         </div>
 
         {/* Individual reference image containers */}
@@ -821,7 +821,7 @@ export default function BillPreview({
           <div
             key={index}
             ref={(el) => { imageRefsArray.current[index] = el; }}
-            style={{ width: '794px', padding: '24px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backgroundColor: '#ffffff', boxSizing: 'border-box' }}
+            style={{ width: `${PDF_CONTENT_WIDTH_PX}px`, padding: '24px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', backgroundColor: '#ffffff', boxSizing: 'border-box' }}
           >
             <h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', marginBottom: '16px', textAlign: 'center' }}>
               {t.images.referenceImagesPage} {index + 1}
