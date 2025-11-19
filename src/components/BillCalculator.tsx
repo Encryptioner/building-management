@@ -807,15 +807,17 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
               />
             </div>
 
-            {/* Reference Images */}
-            <div className="md:col-span-2">
-              <ImageUploader
-                images={billData.referenceImages || []}
-                onImagesChange={(images) => handleInputChange('referenceImages', images)}
-                language={language}
-                maxImages={10}
-              />
-            </div>
+            {/* Reference Images - Only show in calculated mode */}
+            {formMode === 'calculated' && (
+              <div className="md:col-span-2">
+                <ImageUploader
+                  images={billData.referenceImages || []}
+                  onImagesChange={(images) => handleInputChange('referenceImages', images)}
+                  language={language}
+                  maxImages={10}
+                />
+              </div>
+            )}
           </div>
         </div>
 

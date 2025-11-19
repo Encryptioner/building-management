@@ -1,9 +1,10 @@
 import { useRef } from 'react';
+import html2canvas from 'html2canvas';
 import type { Building, Flat } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
 import { getTranslations, getLocaleCode, getUIMessages } from '../../utils/i18n';
 import { usePDFGeneratorManual } from '@encryptioner/html-to-pdf-generator/react';
-import { DEFAULT_PDF_OPTIONS, PDF_CONTENT_WIDTH_PX } from '@encryptioner/html-to-pdf-generator';
+import { DEFAULT_PDF_OPTIONS, PDF_CONTENT_WIDTH_PX, injectPDFStyles } from '@encryptioner/html-to-pdf-generator';
 
 interface ResidentsPrintProps {
   building: Building;
@@ -54,6 +55,78 @@ export default function ResidentsPrint({
     } catch (error) {
       console.error('Failed to generate PDF:', error);
       alert(t.pdf?.downloading || 'Failed to generate PDF. Please try again.');
+    }
+  };
+
+  const handleShare = async () => {
+    try {
+      // Check if Web Share API is supported
+      if (!navigator.share) {
+        alert(uiMsgs.shareNotSupported || 'Sharing is not supported on this browser');
+        return;
+      }
+
+      if (!offscreenRef.current) return;
+
+      // Inject CSS to override OKLCH color variables with hex equivalents
+      const removeStyles = injectPDFStyles();
+
+      // Wait a tick for styles to apply
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Generate canvas from the offscreen element
+      const canvas = await html2canvas(offscreenRef.current, {
+        scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        removeContainer: false,
+        imageTimeout: 0,
+        width: PDF_CONTENT_WIDTH_PX,
+        windowWidth: PDF_CONTENT_WIDTH_PX,
+      });
+
+      // Remove the style override
+      removeStyles();
+
+      // Convert canvas to blob
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.9);
+      });
+
+      if (!blob) {
+        alert(uiMsgs.imageGenerationError);
+        return;
+      }
+
+      // Create a File object from the blob
+      const sanitizedName = building.name
+        .trim()
+        .replace(/[^\w\s\u0980-\u09FF-]/g, ' ')
+        .replace(/\s+/g, '_')
+        .replace(/^_+|_+$/g, '');
+      const fileName = `${sanitizedName}_residents_${new Date().toISOString().split('T')[0]}.jpg`;
+      const file = new File([blob], fileName, { type: 'image/jpeg' });
+
+      // Check if files can be shared
+      if (navigator.canShare && !navigator.canShare({ files: [file] })) {
+        alert(uiMsgs.shareNotSupported || 'Sharing files is not supported on this device');
+        return;
+      }
+
+      // Share the file
+      await navigator.share({
+        title: t.building.residentListPreview,
+        text: t.building.residentListPreview || 'Resident List',
+        files: [file],
+      });
+    } catch (error) {
+      // User cancelled the share or other error occurred
+      if ((error as Error).name !== 'AbortError') {
+        console.error('Error sharing:', error);
+        alert(uiMsgs.shareError || 'Failed to share the resident list');
+      }
     }
   };
 
@@ -476,19 +549,62 @@ export default function ResidentsPrint({
       <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-2 sm:p-4">
         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
           {/* Modal Header */}
-          <div className="flex items-center justify-between p-3 sm:p-6 border-b border-gray-200">
-            <h2 className="text-lg sm:text-2xl font-bold text-gray-900 truncate pr-2">
+          <div className="flex justify-between items-center p-3 md:p-4 border-b bg-gray-50 flex-wrap gap-2">
+            <h2 className="text-lg md:text-xl font-bold text-gray-900">
               {t.building.residentListPreview}
             </h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-              aria-label={t.preview.close}
-            >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={handleShare}
+                className="px-3 py-2 text-sm md:px-4 md:text-base bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium flex items-center gap-2"
+              >
+                <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
+                  />
+                </svg>
+                <span className="hidden sm:inline">{t.actions.share}</span>
+                <span className="sm:hidden">{t.actions.share}</span>
+              </button>
+              <button
+                onClick={handleDownloadPDF}
+                disabled={isGeneratingPDF}
+                className="px-3 py-2 text-sm md:px-4 md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {isGeneratingPDF ? (
+                  <>
+                    <svg className="w-4 h-4 md:w-5 md:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span className="hidden sm:inline">{progress > 0 ? `${progress}%` : t.pdf?.downloading || 'Generating...'}</span>
+                    <span className="sm:hidden">...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                    <span className="hidden sm:inline">{t.actions.download}</span>
+                    <span className="sm:hidden">PDF</span>
+                  </>
+                )}
+              </button>
+              <button
+                onClick={onClose}
+                className="px-3 py-2 text-sm md:px-4 md:text-base bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
+              >
+                {t.preview.close}
+              </button>
+            </div>
           </div>
 
           {/* Modal Body - Scrollable Preview */}
@@ -496,40 +612,6 @@ export default function ResidentsPrint({
             <div className="min-w-min">
               <PrintContent />
             </div>
-          </div>
-
-          {/* Modal Footer */}
-          <div className="flex items-center justify-end gap-2 sm:gap-4 p-3 sm:p-6 border-t border-gray-200 bg-gray-50">
-            <button
-              onClick={onClose}
-              disabled={isGeneratingPDF}
-              className="px-3 py-2 sm:px-6 sm:py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {t.preview.close}
-            </button>
-            <button
-              onClick={handleDownloadPDF}
-              disabled={isGeneratingPDF}
-              className="px-3 py-2 sm:px-6 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-1 sm:gap-2 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isGeneratingPDF ? (
-                <>
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <span className="hidden xs:inline">{progress > 0 ? `${progress}%` : t.pdf.downloading}</span>
-                </>
-              ) : (
-                <>
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  <span className="hidden xs:inline">{t.actions.download}</span>
-                  <span className="xs:hidden">{t.actions.downloadShort}</span>
-                </>
-              )}
-            </button>
           </div>
         </div>
       </div>

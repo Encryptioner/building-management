@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { generateBatchPDF, type PDFContentItem } from '@encryptioner/html-to-pdf-generator';
@@ -28,6 +28,8 @@ export default function BillPreview({
   const offscreenRef = useRef<HTMLDivElement>(null);
   const billOnlyRef = useRef<HTMLDivElement>(null); // For bill without reference images
   const imageRefsArray = useRef<(HTMLDivElement | null)[]>([]); // For reference images
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [pdfGenerationProgress, setPDFGenerationProgress] = useState(0);
   const currentDate = new Date().toLocaleString(getLocaleCode(language), {
     year: 'numeric',
     month: 'long',
@@ -100,6 +102,7 @@ export default function BillPreview({
 
   const handleDownloadPDF = async () => {
     try {
+      setIsGeneratingPDF(true);
       // Check if there are reference images
       if (billData.referenceImages && billData.referenceImages.length > 0) {
         // Use batch PDF generation for bill + reference images
@@ -111,6 +114,8 @@ export default function BillPreview({
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert(uiMsgs.pdfGenerationError);
+    } finally {
+      setIsGeneratingPDF(false);
     }
   };
 
@@ -177,7 +182,12 @@ export default function BillPreview({
     }
 
     // Generate the batch PDF
-    await generateBatchPDF(items, getSanitizedFileName('pdf'), DEFAULT_PDF_OPTIONS);
+    await generateBatchPDF(items, getSanitizedFileName('pdf'), {
+      ...DEFAULT_PDF_OPTIONS,
+      onProgress: (p) => {
+        setPDFGenerationProgress(p);
+      },
+    });
   };
 
   const handleShare = async () => {
@@ -734,18 +744,32 @@ export default function BillPreview({
             </button>
             <button
               onClick={handleDownloadPDF}
-              className="px-3 py-2 text-sm md:px-4 md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+              disabled={isGeneratingPDF}
+              className="px-3 py-2 text-sm md:px-4 md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              <span className="hidden sm:inline">{t.actions.download}</span>
-              <span className="sm:hidden">PDF</span>
+              {isGeneratingPDF ? (
+                <>
+                  <svg className="w-4 h-4 md:w-5 md:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span className="hidden sm:inline">{pdfGenerationProgress > 0 ? `${pdfGenerationProgress}%` : (uiMsgs.generatingPDF || 'Generating...')}</span>
+                  <span className="sm:hidden">...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                  <span className="hidden sm:inline">{t.actions.download}</span>
+                  <span className="sm:hidden">PDF</span>
+                </>
+              )}
             </button>
             <button
               onClick={handleDownloadImage}
