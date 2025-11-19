@@ -11,7 +11,7 @@ This project supports two deployment scenarios:
 
 The project is configured for automatic deployment to GitHub Pages.
 
-**Deployment URL:** `https://encryptioner.github.io/service-charge/`
+**Deployment URL:** `https://encryptioner.github.io/building-management/`
 
 ### Steps:
 
@@ -27,7 +27,7 @@ The project is configured for automatic deployment to GitHub Pages.
    - Check the **Actions** tab for deployment status
 
 3. **Verify Deployment:**
-   - Visit: `https://encryptioner.github.io/service-charge/`
+   - Visit: `https://encryptioner.github.io/building-management/`
    - Check service worker registration in DevTools → Application → Service Workers
 
 ### Manual Build (Local Testing)
@@ -206,11 +206,11 @@ After deployment, verify:
 
 ```
 dist/
-├── service-charge/
+├── building-management/
 │   ├── index.html
 │   ├── favicon.svg
-│   ├── manifest.json       # Points to /service-charge/
-│   ├── sw.js               # Auto-detects /service-charge/
+│   ├── manifest.json       # Points to /building-management/
+│   ├── sw.js               # Auto-detects /building-management/
 │   └── _astro/
 ```
 

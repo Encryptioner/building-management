@@ -5,7 +5,7 @@ This guide shows how to test the extracted `@encryptioner/html-to-pdf-generator`
 ## Package Location
 - **Local Package**: `/<file-path>/html-to-pdf-generator`
 - **Package Name**: `@encryptioner/html-to-pdf-generator`
-- **Current Project**: `/<file-path>/service-charge`
+- **Current Project**: `/<file-path>/building-management`
 
 ## Method 1: Using `pnpm link` (Recommended)
 
@@ -25,10 +25,10 @@ pnpm link --global
 
 ### Step 2: Link in This Project
 
-In the service-charge project directory:
+In the building-management project directory:
 
 ```bash
-cd /<file-path>/service-charge
+cd /<file-path>/building-management
 
 # Link the global package
 pnpm link --global @encryptioner/html-to-pdf-generator
@@ -63,7 +63,7 @@ Visit your app and test the PDF generation functionality.
 To unlink and go back to local version:
 
 ```bash
-# In service-charge project
+# In building-management project
 pnpm unlink --global @encryptioner/html-to-pdf-generator
 
 # Optionally, in pdf generator project
@@ -77,7 +77,7 @@ This method doesn't require linking and changes are reflected immediately.
 
 ### Step 1: Add Dependency
 
-Edit `package.json` in the service-charge project:
+Edit `package.json` in the building-management project:
 
 ```json
 {
@@ -127,11 +127,11 @@ In a parent directory containing both projects:
 
 ```yaml
 packages:
-  - 'service-charge'
+  - 'building-management'
   - 'html-to-pdf-generator'
 ```
 
-Then you can reference the package directly in service-charge's package.json:
+Then you can reference the package directly in building-management's package.json:
 
 ```json
 {
@@ -169,7 +169,7 @@ The `PDF_CONTENT_WIDTH_PX` constant from `src/utils/pdf-helpers.ts` is specific 
 
 **Option A: Keep it local**
 ```typescript
-// In service-charge project
+// In building-management project
 export const PDF_CONTENT_WIDTH_PX = 718; // A4 width - margins
 ```
 
@@ -178,7 +178,7 @@ export const PDF_CONTENT_WIDTH_PX = 718; // A4 width - margins
 // In html-to-pdf-generator/src/index.ts
 export { PDF_CONTENT_WIDTH_PX } from './utils/pdf-helpers';
 
-// Then import in service-charge
+// Then import in building-management
 import { PDF_CONTENT_WIDTH_PX } from '@encryptioner/html-to-pdf-generator';
 ```
 
@@ -207,8 +207,8 @@ cd /<file-path>/html-to-pdf-generator
 pnpm build
 pnpm link --global
 
-# In service-charge directory
-cd /<file-path>/service-charge
+# In building-management directory
+cd /<file-path>/building-management
 pnpm link --global @encryptioner/html-to-pdf-generator
 
 # Update imports in ResidentsPrint.tsx
@@ -243,7 +243,7 @@ ls -la dist/*.d.ts  # Should see index.d.ts, react.d.ts, etc.
 
 ### Issue: "Peer dependency warnings"
 
-**Solution**: The package has React as a peer dependency. Make sure React is installed in service-charge project (it already is).
+**Solution**: The package has React as a peer dependency. Make sure React is installed in building-management project (it already is).
 
 ## Recommended Workflow
 
@@ -259,7 +259,7 @@ ls -la dist/*.d.ts  # Should see index.d.ts, react.d.ts, etc.
 
 3. **Production Phase**:
    - Publish package to npm
-   - Update service-charge to use `"@encryptioner/html-to-pdf-generator": "^1.0.0"`
+   - Update building-management to use `"@encryptioner/html-to-pdf-generator": "^1.0.0"`
    - Remove local lib folder if no longer needed
 
 ## Next Steps
@@ -270,5 +270,5 @@ After successfully testing locally:
 2. ✅ Test on different screen sizes (desktop, mobile)
 3. ✅ Ensure no regressions in PDF output
 4. 📦 Publish to npm: `npm publish --access public`
-5. 🔄 Update service-charge to use published package
+5. 🔄 Update building-management to use published package
 6. 🗑️ Remove `src/lib/pdf-generator/` folder (keep a backup first!)

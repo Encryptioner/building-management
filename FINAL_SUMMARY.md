@@ -104,7 +104,7 @@ Rounded: 718px
 ## Testing
 
 ### Dev Server Status
-✅ Running successfully at `http://localhost:4322/service-charge/`
+✅ Running successfully at `http://localhost:4322/building-management/`
 ✅ No compilation errors
 ✅ No TypeScript errors
 ✅ HMR (Hot Module Replacement) working
@@ -192,7 +192,7 @@ Please test the following to verify all fixes:
 
 If you have any questions:
 - Check the documentation files created
-- Dev server is at: `http://localhost:4322/service-charge/`
+- Dev server is at: `http://localhost:4322/building-management/`
 - All fixes are complete and tested
 
 ---

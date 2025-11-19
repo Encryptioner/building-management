@@ -80,7 +80,7 @@ This project supports **two deployment modes**:
 pnpm build:github  # or just pnpm build
 git push origin main
 ```
-Deployed at: `https://encryptioner.github.io/service-charge/`
+Deployed at: `https://encryptioner.github.io/building-management/`
 
 ### Custom Domain
 ```bash

@@ -98,7 +98,7 @@ pnpm astro check
 ```bash
 pnpm dev
 ```
-**Result**: ✅ Running at `http://localhost:4322/service-charge/`
+**Result**: ✅ Running at `http://localhost:4322/building-management/`
 
 ### Import Analysis
 ```bash
@@ -184,7 +184,7 @@ See the package README for full API documentation.
 ## Next Steps
 
 ### Immediate Testing
-1. Open `http://localhost:4322/service-charge/`
+1. Open `http://localhost:4322/building-management/`
 2. Test all PDF generation features:
    - Service charge bills
    - Blank forms

@@ -1,7 +1,7 @@
-const CACHE_NAME = 'service-charge-v1';
+const CACHE_NAME = 'building-management-v1';
 
 // Automatically detect base URL from service worker location
-// This works for both GitHub Pages (/service-charge/) and custom domain (/)
+// This works for both GitHub Pages (/building-management/) and custom domain (/)
 const getBaseURL = () => {
   const swPath = self.location.pathname;
   // Remove /sw.js from the end to get base path

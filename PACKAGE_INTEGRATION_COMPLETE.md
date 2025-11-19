@@ -54,12 +54,12 @@ Result: **0 errors, 0 warnings** (only 31 hints)
 ```bash
 pnpm dev
 ```
-Result: Running at `http://localhost:4322/service-charge/` with no errors
+Result: Running at `http://localhost:4322/building-management/` with no errors
 
 ## Testing the Integration
 
 ### To Test PDF Generation:
-1. Open: `http://localhost:4322/service-charge/`
+1. Open: `http://localhost:4322/building-management/`
 2. Navigate to **Residents** section
 3. Add some residents to a building
 4. Click **"Preview"** on a resident list
@@ -85,11 +85,11 @@ If you need to modify the PDF generator package:
    pnpm build
    ```
 
-3. **Changes reflect automatically** in service-charge project (no need to reinstall)
+3. **Changes reflect automatically** in building-management project (no need to reinstall)
 
 4. **Restart dev server** (if needed):
    ```bash
-   # In service-charge directory
+   # In building-management directory
    pnpm dev
    ```
 
@@ -103,7 +103,7 @@ cd /<file-path>/html-to-pdf-generator
 pnpm dev  # Runs tsup --watch
 
 # Terminal 2: Service charge dev server
-cd /<file-path>/service-charge
+cd /<file-path>/building-management
 pnpm dev
 ```
 
@@ -115,11 +115,11 @@ This auto-rebuilds the package whenever you make changes!
 /<file-path>/
 ├── html-to-pdf-generator/          # Extracted package
 │   ├── src/                        # Source files
-│   ├── dist/                       # Built files (imported by service-charge)
+│   ├── dist/                       # Built files (imported by building-management)
 │   ├── package.json                # Package: @encryptioner/html-to-pdf-generator
 │   └── tsup.config.ts              # Build configuration
 │
-└── service-charge/                 # This project
+└── building-management/                 # This project
     ├── src/components/residents/
     │   └── ResidentsPrint.tsx      # Uses the package
     ├── package.json                # References package via file:
@@ -155,7 +155,7 @@ This auto-rebuilds the package whenever you make changes!
    npm publish --access public
    ```
 
-2. **Update service-charge to use published version:**
+2. **Update building-management to use published version:**
    ```json
    {
      "dependencies": {
@@ -171,7 +171,7 @@ This auto-rebuilds the package whenever you make changes!
 
 4. **Optional: Remove local PDF generator folder** (after backup):
    ```bash
-   # In service-charge project
+   # In building-management project
    rm -rf src/lib/pdf-generator/
    ```
 

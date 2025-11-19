@@ -160,7 +160,7 @@ pnpm astro check
 pnpm dev
 ```
 
-**Result**: ✅ Running successfully at `http://localhost:4321/service-charge/`
+**Result**: ✅ Running successfully at `http://localhost:4321/building-management/`
 
 ## Benefits
 

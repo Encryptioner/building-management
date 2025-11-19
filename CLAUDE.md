@@ -25,7 +25,7 @@ pnpm preview              # Preview production build locally
 
 ### Build Configuration System
 The project has a dual-deployment architecture controlled by the `DEPLOY_TARGET` environment variable:
-- **GitHub Pages mode** (`DEPLOY_TARGET=github`): Sets `base: '/service-charge/'` and copies `manifest.github.json`
+- **GitHub Pages mode** (`DEPLOY_TARGET=github`): Sets `base: '/building-management/'` and copies `manifest.github.json`
 - **Custom domain mode** (`DEPLOY_TARGET=custom`): Sets `base: '/'` and copies `manifest.custom.json`
 
 The build process runs `scripts/prepare-manifest.js` to copy the correct manifest file before Astro builds.
