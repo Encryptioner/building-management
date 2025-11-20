@@ -126,7 +126,7 @@ export const en = {
     blankFormModeDesc: 'Create printable blank forms',
   },
   footer: {
-    createdBy: 'Created by',
+    developedBy: 'Developed by',
   },
   help: {
     welcome: 'Welcome! This tool helps you manage your building and create bills for apartment buildings.',
