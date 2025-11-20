@@ -3,6 +3,7 @@ import type { SupportedLanguage } from '../locales/config';
 import { isLanguageSupported } from '../locales/config';
 import { getTranslations } from '../utils/i18n';
 import LanguageSelector from './LanguageSelector';
+import Footer from './Footer';
 
 type ActiveTab = 'bills' | 'residents';
 
@@ -172,6 +173,9 @@ export default function Navigation({ children }: NavigationProps) {
       <main>
         {isClient && children(activeTab, language)}
       </main>
+
+      {/* Footer */}
+      {isClient && <Footer language={language} />}
     </div>
   );
 }
