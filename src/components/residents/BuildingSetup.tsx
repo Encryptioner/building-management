@@ -4,6 +4,7 @@ import { getTranslations, getValidationMessages } from '../../utils/i18n';
 import { saveBuilding } from '../../utils/buildingStorage';
 import { generateExampleBuildingData } from '../../utils/exampleBuildingData';
 import { importBuildingDataFromFile } from '../../utils/dataExport';
+import { trackEvent } from '../../config/googleAnalytics';
 
 interface BuildingSetupProps {
   language: SupportedLanguage;
@@ -63,6 +64,7 @@ export default function BuildingSetup({ language, onSetupComplete }: BuildingSet
         updatedAt: new Date().toISOString(),
       };
       saveBuilding(building);
+      trackEvent({ name: 'building_setup_completed', params: { flat_count: 0 } });
       onSetupComplete();
     } catch (error) {
       console.error('Failed to create building:', error);

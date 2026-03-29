@@ -5,6 +5,7 @@ import { loadBuilding, clearBuilding, saveBuilding } from '../../utils/buildingS
 import { exportBuildingData, importBuildingDataFromFile } from '../../utils/dataExport';
 import { getTranslations, getConfirmationMessages } from '../../utils/i18n';
 import { generateExampleBuildingData } from '../../utils/exampleBuildingData';
+import { trackEvent } from '../../config/googleAnalytics';
 import BuildingSetup from './BuildingSetup';
 import BuildingInfo from './BuildingInfo';
 import FlatList from './FlatList';
@@ -47,12 +48,14 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
   const handleExport = () => {
     if (building) {
       exportBuildingData(building);
+      trackEvent({ name: 'data_exported', params: { data_type: 'building' } });
     }
   };
 
   const handleClearAll = () => {
     clearBuilding();
     setShowClearConfirm(false);
+    trackEvent({ name: 'data_cleared' });
     // Reload the building data which will be null now, triggering the setup screen
     loadBuildingData();
   };
@@ -83,6 +86,7 @@ export default function ResidentsManager({ language }: ResidentsManagerProps) {
       if (result.success && result.data) {
         saveBuilding(result.data);
         loadBuildingData();
+        trackEvent({ name: 'data_imported', params: { data_type: 'building' } });
       } else {
         alert(`${t.errors.importFailed}: ${result.error}`);
       }

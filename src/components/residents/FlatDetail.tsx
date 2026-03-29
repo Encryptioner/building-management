@@ -3,6 +3,7 @@ import type { Flat, Resident } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
 import { getTranslations } from '../../utils/i18n';
 import { deleteFlat, deleteResident } from '../../utils/buildingStorage';
+import { trackEvent } from '../../config/googleAnalytics';
 import ResidentForm from './ResidentForm';
 import ResidentCard from './ResidentCard';
 import ConfirmModal from '../ConfirmModal';
@@ -25,6 +26,7 @@ export default function FlatDetail({ flat, language, onClose, onUpdate, onEditFl
 
   const handleDeleteFlat = () => {
     if (deleteFlat(flat.id)) {
+      trackEvent({ name: 'flat_deleted' });
       onUpdate();
       onClose();
     } else {

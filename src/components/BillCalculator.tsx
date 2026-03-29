@@ -7,6 +7,7 @@ import { getExampleData } from '../utils/exampleData';
 import { getTranslations, getValidationMessages, getConfirmationMessages, getUIMessages } from '../utils/i18n';
 import { numberToWords } from '../utils/numberToWords';
 import { exportBillData, importBillDataFromFile } from '../utils/dataExport';
+import { trackEvent } from '../config/googleAnalytics';
 import CategoryForm from './CategoryForm';
 import BillPreview from './BillPreview';
 import BlankFormPreview from './BlankFormPreview';
@@ -185,6 +186,13 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
         return newErrors;
       });
     }
+
+    if (field === 'showMotorcycleInBlankForm') {
+      trackEvent({ name: 'bill_settings_changed', params: { setting: 'garage_motorcycle' } });
+    }
+    if (field === 'showCarInBlankForm') {
+      trackEvent({ name: 'bill_settings_changed', params: { setting: 'garage_car' } });
+    }
   };
 
   const addCategory = () => {
@@ -200,6 +208,7 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
       ...prev,
       categories: [...prev.categories, newCategory],
     }));
+    trackEvent({ name: 'bill_category_added', params: { billing_type: 'divided' } });
   };
 
   const updateCategory = (id: string, updates: Partial<ServiceCategory>) => {
@@ -209,6 +218,13 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
         cat.id === id ? { ...cat, ...updates } : cat
       ),
     }));
+
+    if ('isOwnerOnly' in updates && updates.isOwnerOnly !== undefined) {
+      trackEvent({ name: 'bill_settings_changed', params: { setting: 'owner_only' } });
+    }
+    if ('excludedFlats' in updates && updates.excludedFlats !== undefined && updates.excludedFlats > 0) {
+      trackEvent({ name: 'bill_settings_changed', params: { setting: 'exclude_vacant' } });
+    }
 
     // Clear validation errors for this category field
     if (validationErrors.categories?.[id]) {
@@ -238,6 +254,7 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
       ...prev,
       categories: prev.categories.filter((cat) => cat.id !== id),
     }));
+    trackEvent({ name: 'bill_category_removed' });
   };
 
   const loadExample = () => {
@@ -252,10 +269,12 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
     setValidationErrors({});
     setShowHelp(true);
     setShowClearConfirm(false);
+    trackEvent({ name: 'data_cleared' });
   };
 
   const handleExport = () => {
     exportBillData(billData);
+    trackEvent({ name: 'data_exported', params: { data_type: 'bill' } });
   };
 
   const handleImportClick = () => {
@@ -275,6 +294,7 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
         setValidationErrors({});
         setShowHelp(false);
         saveBillData(result.data, formMode);
+        trackEvent({ name: 'data_imported', params: { data_type: 'bill' } });
       } else {
         alert(`${t.errors.importFailed}: ${result.error}`);
       }
@@ -295,6 +315,19 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
       ...prev,
       garage: { ...prev.garage, [field]: value },
     }));
+  };
+
+  const handleOpenPreview = () => {
+    const canOpen =
+      formMode === 'calculated'
+        ? validateForm()
+        : billData.title.trim().length > 0 && billData.categories.length > 0;
+
+    if (!canOpen) return;
+
+    setShowPreview(true);
+    trackEvent({ name: 'bill_previewed', params: { mode: formMode } });
+    trackEvent({ name: 'bill_created', params: { mode: formMode, category_count: billData.categories.length } });
   };
 
   const summary = calculateBillSummary(billData.categories, billData.numberOfFlats, billData.garage);
@@ -428,18 +461,7 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
               {/* Preview Button - Show only if there's data */}
               {billData.categories.length > 0 && (
                 <button
-                  onClick={() => {
-                    if (formMode === 'calculated') {
-                      if (validateForm()) {
-                        setShowPreview(true);
-                      }
-                    } else {
-                      // Blank mode - only validate title and categories exist
-                      if (billData.title.trim() && billData.categories.length > 0) {
-                        setShowPreview(true);
-                      }
-                    }
-                  }}
+                  onClick={handleOpenPreview}
                   className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm sm:text-base flex items-center gap-2"
                   title={t.actions.preview}
                 >
@@ -1043,18 +1065,7 @@ export default function BillCalculator({ language }: BillCalculatorProps) {
             <span className="xs:hidden">{t.actions.clearShort}</span>
           </button>
           <button
-            onClick={() => {
-              if (formMode === 'calculated') {
-                if (validateForm()) {
-                  setShowPreview(true);
-                }
-              } else {
-                // Blank mode - only validate title and categories exist
-                if (billData.title.trim() && billData.categories.length > 0) {
-                  setShowPreview(true);
-                }
-              }
-            }}
+            onClick={handleOpenPreview}
             disabled={billData.categories.length === 0}
             className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base"
           >

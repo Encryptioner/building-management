@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { SupportedLanguage } from '../locales/config';
 import { isLanguageSupported } from '../locales/config';
 import { getTranslations } from '../utils/i18n';
+import { trackEvent } from '../config/googleAnalytics';
 import LanguageSelector from './LanguageSelector';
 import Footer from './Footer';
 
@@ -38,6 +39,7 @@ export default function Navigation({ children }: NavigationProps) {
     if (isClient) {
       localStorage.setItem('preferred-language', newLanguage);
     }
+    trackEvent({ name: 'language_changed', params: { language: newLanguage as 'bn' | 'en' } });
   };
 
   const handleTabChange = (tab: ActiveTab) => {
@@ -45,6 +47,7 @@ export default function Navigation({ children }: NavigationProps) {
     if (isClient) {
       localStorage.setItem('activeView', tab);
     }
+    trackEvent({ name: 'tab_switched', params: { tab } });
     // Scroll to top on tab change
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };

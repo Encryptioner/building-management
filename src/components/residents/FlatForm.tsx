@@ -3,6 +3,7 @@ import type { Flat, FlatOwnershipType } from '../../types';
 import type { SupportedLanguage } from '../../locales/config';
 import { getTranslations, getValidationMessages } from '../../utils/i18n';
 import { addFlat, updateFlat } from '../../utils/buildingStorage';
+import { trackEvent } from '../../config/googleAnalytics';
 
 interface FlatFormProps {
   language: SupportedLanguage;
@@ -60,6 +61,7 @@ export default function FlatForm({ language, flat, preselectedFloor, onSuccess, 
           carParkingCount: parseInt(carParkingCount) || 0,
           notes: notes.trim(),
         });
+        trackEvent({ name: 'flat_edited' });
       } else {
         addFlat({
           floorNumber: floorNumber.trim(),
@@ -70,6 +72,7 @@ export default function FlatForm({ language, flat, preselectedFloor, onSuccess, 
           carParkingCount: parseInt(carParkingCount) || 0,
           notes: notes.trim(),
         });
+        trackEvent({ name: 'flat_added', params: { flat_type: ownershipType } });
       }
       onSuccess();
     } catch (error) {

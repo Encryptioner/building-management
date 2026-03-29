@@ -5,6 +5,7 @@ import type { SupportedLanguage } from '../../locales/config';
 import { getTranslations, getLocaleCode, getUIMessages } from '../../utils/i18n';
 import { usePDFGeneratorManual } from '@encryptioner/html-to-pdf-generator/react';
 import { DEFAULT_PDF_OPTIONS, PDF_CONTENT_WIDTH_PX, injectPDFStyles } from '@encryptioner/html-to-pdf-generator';
+import { trackEvent, sanitizeError } from '../../config/googleAnalytics';
 
 interface ResidentsPrintProps {
   building: Building;
@@ -52,8 +53,11 @@ export default function ResidentsPrint({
       }.pdf`;
 
       await generatePDFLib(offscreenRef.current, fileName);
+      trackEvent({ name: 'pdf_downloaded', params: { content: 'resident_list' } });
     } catch (error) {
       console.error('Failed to generate PDF:', error);
+      const errorMsg = error instanceof Error ? sanitizeError(error.message) : 'Unknown error';
+      trackEvent({ name: 'pdf_download_failed', params: { content: 'resident_list', error: errorMsg } });
       alert(t.pdf?.downloading || 'Failed to generate PDF. Please try again.');
     }
   };

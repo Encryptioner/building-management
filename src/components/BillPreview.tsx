@@ -8,6 +8,7 @@ import { getTranslations, getLocaleCode, getUIMessages } from '../utils/i18n';
 import { formatNumber } from '../utils/calculations';
 import { numberToWords } from '../utils/numberToWords';
 import { injectPDFStyles, DEFAULT_PDF_OPTIONS, PDF_CONTENT_WIDTH_PX } from '@encryptioner/html-to-pdf-generator';
+import { trackEvent, sanitizeError } from '../config/googleAnalytics';
 
 interface BillPreviewProps {
   billData: BillData;
@@ -111,8 +112,11 @@ export default function BillPreview({
         // Use simple canvas-based PDF for bill only
         await handleSimplePDFGeneration();
       }
+      trackEvent({ name: 'pdf_downloaded', params: { content: 'bill' } });
     } catch (error) {
       console.error('Error generating PDF:', error);
+      const errorMsg = error instanceof Error ? sanitizeError(error.message) : 'Unknown error';
+      trackEvent({ name: 'pdf_download_failed', params: { content: 'bill', error: errorMsg } });
       alert(uiMsgs.pdfGenerationError);
     } finally {
       setIsGeneratingPDF(false);

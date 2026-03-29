@@ -5,6 +5,7 @@ import type { BillData } from '../types';
 import type { SupportedLanguage } from '../locales/config';
 import { getTranslations, getUIMessages } from '../utils/i18n';
 import { injectPDFStyles } from '@encryptioner/html-to-pdf-generator';
+import { trackEvent, sanitizeError } from '../config/googleAnalytics';
 
 interface BlankFormPreviewProps {
   billData: BillData;
@@ -117,8 +118,11 @@ export default function BlankFormPreview({
       );
 
       pdf.save(getSanitizedFileName('pdf'));
+      trackEvent({ name: 'pdf_downloaded', params: { content: 'bill' } });
     } catch (error) {
       console.error('Error generating PDF:', error);
+      const errorMsg = error instanceof Error ? sanitizeError(error.message) : 'Unknown error';
+      trackEvent({ name: 'pdf_download_failed', params: { content: 'bill', error: errorMsg } });
       alert(uiMsgs.pdfGenerationError);
     }
   };
