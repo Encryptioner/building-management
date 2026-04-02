@@ -9,7 +9,7 @@ export default function Footer({ language }: FooterProps) {
   const t = getTranslations(language);
 
   return (
-    <footer className="bg-gray-900 text-white py-8 mt-12">
+    <footer className="bg-gray-900 text-white py-4 mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center">
           <p className="text-lg font-medium mb-2">
@@ -23,7 +23,7 @@ export default function Footer({ language }: FooterProps) {
               Ankur Mursalin
             </a>
           </p>
-          <div className="flex justify-center gap-6">
+          <div className="flex justify-center items-center gap-6">
             <a
               href="https://www.linkedin.com/in/mir-mursalin-ankur"
               target="_blank"
@@ -55,7 +55,18 @@ export default function Footer({ language }: FooterProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </a>
+            <span className="text-gray-600">|</span>
+            <a
+              href="https://www.supportkori.com/mirmursalinankur"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-amber-400 hover:text-amber-300 transition-colors text-sm font-medium"
+              aria-label="Support"
+            >
+              ☕ Support
+            </a>
           </div>
+          <p className="text-xs text-gray-500 mt-2">Free & open source</p>
         </div>
       </div>
     </footer>
